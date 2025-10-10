@@ -94,6 +94,7 @@ Future<String> sendDailyEmail({
           time: time,
           chlorine: chlorine,
           success: true,
+          isDebugMode: settings.isDebugMode,
         );
 
         // 設定を再取得してメッセージに含める
@@ -125,6 +126,7 @@ Future<String> sendDailyEmail({
             time: time,
             chlorine: chlorine,
             success: true,
+            isDebugMode: settings.isDebugMode,
           );
 
           // 設定を再取得してメッセージに含める
@@ -141,6 +143,7 @@ Future<String> sendDailyEmail({
             time: time,
             chlorine: chlorine,
             success: false,
+            isDebugMode: settings.isDebugMode,
           );
           return '送信に失敗しました: ${jsonResponse['message']}';
         }
@@ -160,6 +163,7 @@ Future<String> sendDailyEmail({
           time: time,
           chlorine: chlorine,
           success: true,
+          isDebugMode: settings.isDebugMode,
         );
 
         // 設定を再取得してメッセージに含める
@@ -177,6 +181,7 @@ Future<String> sendDailyEmail({
         time: time,
         chlorine: chlorine,
         success: false,
+        isDebugMode: settings.isDebugMode,
       );
       return 'サーバーエラーが発生しました (ステータスコード: ${response.statusCode})';
     }
@@ -187,6 +192,7 @@ Future<String> sendDailyEmail({
       time: time,
       chlorine: chlorine,
       success: false,
+      isDebugMode: settings.isDebugMode,
     );
     return '通信エラーが発生しました: $e';
   }
