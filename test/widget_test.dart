@@ -129,5 +129,13 @@ void main() {
       // バリデーションエラーが表示されることを確認
       expect(find.text('数値で入力してください'), findsOneWidget);
     });
+
+    testWidgets('履歴ボタンが表示される', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // AppBar内の履歴ボタンが表示されることを確認
+      expect(find.byIcon(Icons.history), findsOneWidget);
+    });
   });
 }
