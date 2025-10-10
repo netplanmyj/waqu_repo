@@ -71,36 +71,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _resetSettings() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('設定をリセット'),
-        content: const Text('設定を初期値に戻しますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('リセット'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await SettingsService.resetSettings();
-      _loadSettings();
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('設定をリセットしました')));
-      }
-    }
-  }
-
   String? _validateLocationNumber(String? value) {
     if (value == null || value.isEmpty) {
       return '地点番号を入力してください';
@@ -142,13 +112,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('設定'),
         backgroundColor: Colors.blue[600],
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _resetSettings,
-            tooltip: '設定をリセット',
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,

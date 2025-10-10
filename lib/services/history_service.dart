@@ -6,12 +6,14 @@ class EmailHistory {
   final String time;
   final double chlorine;
   final bool success;
+  final bool isDebugMode;
 
   EmailHistory({
     required this.date,
     required this.time,
     required this.chlorine,
     required this.success,
+    this.isDebugMode = false, // デフォルトはfalse（既存データとの互換性のため）
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class EmailHistory {
       'time': time,
       'chlorine': chlorine,
       'success': success,
+      'isDebugMode': isDebugMode,
     };
   }
 
@@ -29,6 +32,7 @@ class EmailHistory {
       time: json['time'],
       chlorine: json['chlorine'],
       success: json['success'],
+      isDebugMode: json['isDebugMode'] ?? false, // 既存データとの互換性のため
     );
   }
 }
@@ -43,6 +47,7 @@ class HistoryService {
     required String time,
     required double chlorine,
     required bool success,
+    bool isDebugMode = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final histories = await getHistories();
@@ -53,6 +58,7 @@ class HistoryService {
       time: time,
       chlorine: chlorine,
       success: success,
+      isDebugMode: isDebugMode,
     );
 
     histories.add(newHistory);

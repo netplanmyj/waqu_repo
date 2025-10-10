@@ -44,13 +44,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text('送信履歴'),
         backgroundColor: Colors.blue[600],
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadHistories,
-            tooltip: '履歴を更新',
-          ),
-        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -151,6 +144,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   style: TextStyle(
                     fontSize: 10,
                     color: Colors.blue[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            if (history.isDebugMode)
+              Container(
+                margin: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'デバッグ',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.orange[700],
                     fontWeight: FontWeight.bold,
                   ),
                 ),
