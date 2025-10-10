@@ -30,8 +30,11 @@ Future<String> sendDailyEmail({
   required String time,
   required double chlorine,
 }) async {
-  // 1. 日次チェック
-  if (await isSentToday()) {
+  // 設定を取得（デバッグモード確認のため）
+  final settings = await SettingsService.getSettings();
+
+  // 1. 日次チェック（デバッグモード時はスキップ）
+  if (!settings.isDebugMode && await isSentToday()) {
     // 送信済みの日付を取得してメッセージに含める
     final prefs = await SharedPreferences.getInstance();
     final lastDateString = prefs.getString(lastSentDateKey);
@@ -45,8 +48,7 @@ Future<String> sendDailyEmail({
   }
 
   try {
-    // 2. 設定を取得
-    final settings = await SettingsService.getSettings();
+    // 2. 送信データの準備
 
     // 3. 送信データの準備
     final now = DateTime.now();
@@ -59,7 +61,7 @@ Future<String> sendDailyEmail({
         ? settings.testRecipientEmail
         : settings.recipientEmail;
 
-    // 4. GASへのリクエスト
+    // 4. GASへのリクエスト（GETリクエスト）
     final client = http.Client();
     final uri = Uri.parse(gasUrl).replace(
       queryParameters: {
@@ -73,22 +75,22 @@ Future<String> sendDailyEmail({
     );
 
     final response = await client.get(uri);
-    client.close();
-
-    // 200 (OK) と 302 (Found/Redirect) の両方を成功として扱う
+    client.close(); // 200 (OK) と 302 (Found/Redirect) の両方を成功として扱う
     if (response.statusCode == 200 || response.statusCode == 302) {
       String jsonResponseBody = response.body;
 
       // 302の場合、レスポンスボディが空の可能性があるため、成功とみなす
       if (response.statusCode == 302 || jsonResponseBody.isEmpty) {
-        // 成功時：最終送信日を保存
-        final prefs = await SharedPreferences.getInstance();
-        final currentDate = DateTime.now();
-        await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
+        // 成功時：最終送信日を保存（デバッグモード時は保存しない）
+        if (!settings.isDebugMode) {
+          final prefs = await SharedPreferences.getInstance();
+          final currentDate = DateTime.now();
+          await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
+        }
 
         // 履歴に保存
         await HistoryService.addHistory(
-          date: currentDate,
+          date: DateTime.now(),
           time: time,
           chlorine: chlorine,
           success: true,
@@ -107,14 +109,19 @@ Future<String> sendDailyEmail({
       try {
         final jsonResponse = json.decode(jsonResponseBody);
         if (jsonResponse['status'] == 'success') {
-          // 成功時：最終送信日を保存
-          final prefs = await SharedPreferences.getInstance();
-          final currentDate = DateTime.now();
-          await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
+          // 成功時：最終送信日を保存（デバッグモード時は保存しない）
+          if (!settings.isDebugMode) {
+            final prefs = await SharedPreferences.getInstance();
+            final currentDate = DateTime.now();
+            await prefs.setString(
+              lastSentDateKey,
+              currentDate.toIso8601String(),
+            );
+          }
 
           // 履歴に保存
           await HistoryService.addHistory(
-            date: currentDate,
+            date: DateTime.now(),
             time: time,
             chlorine: chlorine,
             success: true,
@@ -139,9 +146,13 @@ Future<String> sendDailyEmail({
         }
       } catch (e) {
         // JSONパースエラーの場合も成功とみなす（302リダイレクトの可能性）
-        final prefs = await SharedPreferences.getInstance();
         final currentDate = DateTime.now();
-        await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
+
+        // デバッグモードでない場合のみ、lastSentDateを保存
+        if (!settings.isDebugMode) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
+        }
 
         // 履歴に保存
         await HistoryService.addHistory(
