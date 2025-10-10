@@ -11,6 +11,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
+  late TextEditingController _gasUrlController;
   late TextEditingController _locationNumberController;
   late TextEditingController _recipientEmailController;
   late TextEditingController _testRecipientEmailController;
@@ -20,6 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    _gasUrlController = TextEditingController();
     _locationNumberController = TextEditingController();
     _recipientEmailController = TextEditingController();
     _testRecipientEmailController = TextEditingController();
@@ -28,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
+    _gasUrlController.dispose();
     _locationNumberController.dispose();
     _recipientEmailController.dispose();
     _testRecipientEmailController.dispose();
@@ -41,6 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final settings = await SettingsService.getSettings();
     setState(() {
+      _gasUrlController.text = settings.gasUrl;
       _locationNumberController.text = settings.locationNumber;
       _recipientEmailController.text = settings.recipientEmail;
       _testRecipientEmailController.text = settings.testRecipientEmail;
@@ -55,6 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     final settings = AppSettings(
+      gasUrl: _gasUrlController.text,
       locationNumber: _locationNumberController.text,
       recipientEmail: _recipientEmailController.text,
       testRecipientEmail: _testRecipientEmailController.text,
@@ -94,6 +99,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return null;
   }
 
+  String? _validateGasUrl(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'GAS WebアプリURLを入力してください';
+    }
+    if (!value.startsWith('https://script.google.com/macros/s/')) {
+      return '正しいGAS WebアプリURLを入力してください';
+    }
+    if (!value.endsWith('/exec')) {
+      return 'URLの末尾が/execではありません';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -118,6 +136,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            // GAS WebアプリURL
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Google Apps Script設定',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _gasUrlController,
+                      decoration: const InputDecoration(
+                        labelText: 'GAS WebアプリURL',
+                        hintText: 'https://script.google.com/macros/s/.../exec',
+                        border: OutlineInputBorder(),
+                        helperText: 'あなた専用のGoogle Apps Script WebアプリURLを入力',
+                      ),
+                      keyboardType: TextInputType.url,
+                      validator: _validateGasUrl,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // 地点番号
             Card(
               child: Padding(

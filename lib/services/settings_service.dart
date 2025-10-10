@@ -1,12 +1,15 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AppSettings {
+  final String gasUrl;
   final String locationNumber;
   final String recipientEmail;
   final String testRecipientEmail;
   final bool isDebugMode;
 
   AppSettings({
+    required this.gasUrl,
     required this.locationNumber,
     required this.recipientEmail,
     required this.testRecipientEmail,
@@ -15,6 +18,7 @@ class AppSettings {
 
   factory AppSettings.defaultSettings() {
     return AppSettings(
+      gasUrl: '',
       locationNumber: '01',
       recipientEmail: '',
       testRecipientEmail: '',
@@ -23,12 +27,14 @@ class AppSettings {
   }
 
   AppSettings copyWith({
+    String? gasUrl,
     String? locationNumber,
     String? recipientEmail,
     String? testRecipientEmail,
     bool? isDebugMode,
   }) {
     return AppSettings(
+      gasUrl: gasUrl ?? this.gasUrl,
       locationNumber: locationNumber ?? this.locationNumber,
       recipientEmail: recipientEmail ?? this.recipientEmail,
       testRecipientEmail: testRecipientEmail ?? this.testRecipientEmail,
@@ -38,6 +44,7 @@ class AppSettings {
 
   Map<String, dynamic> toJson() {
     return {
+      'gasUrl': gasUrl,
       'locationNumber': locationNumber,
       'recipientEmail': recipientEmail,
       'testRecipientEmail': testRecipientEmail,
@@ -47,6 +54,7 @@ class AppSettings {
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
+      gasUrl: json['gasUrl'] ?? '',
       locationNumber: json['locationNumber'] ?? '01',
       recipientEmail: json['recipientEmail'] ?? '',
       testRecipientEmail: json['testRecipientEmail'] ?? '',
@@ -68,27 +76,7 @@ class SettingsService {
     }
 
     try {
-      final Map<String, dynamic> json = {};
-      // 簡易的なJSON解析（実際のアプリではjson.decodeを使用）
-      final lines = settingsJson.split('\n');
-      for (final line in lines) {
-        if (line.contains(':')) {
-          final parts = line.split(':');
-          if (parts.length >= 2) {
-            final key = parts[0].trim().replaceAll('"', '');
-            final value = parts[1]
-                .trim()
-                .replaceAll('"', '')
-                .replaceAll(',', '');
-
-            if (key == 'isDebugMode') {
-              json[key] = value == 'true';
-            } else {
-              json[key] = value;
-            }
-          }
-        }
-      }
+      final Map<String, dynamic> json = jsonDecode(settingsJson);
       return AppSettings.fromJson(json);
     } catch (e) {
       return AppSettings.defaultSettings();
@@ -98,14 +86,7 @@ class SettingsService {
   // 設定を保存
   static Future<void> saveSettings(AppSettings settings) async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString =
-        '''
-{
-  "locationNumber": "${settings.locationNumber}",
-  "recipientEmail": "${settings.recipientEmail}",
-  "testRecipientEmail": "${settings.testRecipientEmail}",
-  "isDebugMode": ${settings.isDebugMode}
-}''';
+    final jsonString = jsonEncode(settings.toJson());
     await prefs.setString(settingsKey, jsonString);
   }
 
