@@ -1,4 +1,10 @@
 // 水質報告アプリの基本的なウィジェットテスト
+//
+// テストファイル構成：
+// - widget_test.dart: メイン画面の基本UIテスト
+// - settings_test.dart: 設定画面と設定サービスのテスト
+// - history_test.dart: 履歴画面と履歴サービスのテスト
+// - email_service_test.dart: メール送信サービスのテスト
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -130,12 +136,15 @@ void main() {
       expect(find.text('数値で入力してください'), findsOneWidget);
     });
 
-    testWidgets('履歴ボタンが表示される', (WidgetTester tester) async {
+    testWidgets('履歴ボタンと設定ボタンが表示される', (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
 
       // AppBar内の履歴ボタンが表示されることを確認
       expect(find.byIcon(Icons.history), findsOneWidget);
+
+      // AppBar内の設定ボタンが表示されることを確認
+      expect(find.byIcon(Icons.settings), findsOneWidget);
     });
   });
 }

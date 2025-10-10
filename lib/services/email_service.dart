@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wq_report/config/keys.dart';
 import 'package:wq_report/services/history_service.dart';
 import 'package:wq_report/services/settings_service.dart';
-
-// ステップ1で取得したGASのWebアプリURLに置き換えてください
-const String gasUrl = gasWebAppURL;
 
 // 日付を保存するキー
 const String lastSentDateKey = 'lastSentDate';
@@ -32,6 +28,11 @@ Future<String> sendDailyEmail({
 }) async {
   // 設定を取得（デバッグモード確認のため）
   final settings = await SettingsService.getSettings();
+
+  // GAS URLが設定されていない場合のチェック
+  if (settings.gasUrl.isEmpty) {
+    return 'GAS WebアプリURLが設定されていません。設定画面で設定してください。';
+  }
 
   // 1. 日次チェック（デバッグモード時はスキップ）
   if (!settings.isDebugMode && await isSentToday()) {
@@ -63,7 +64,7 @@ Future<String> sendDailyEmail({
 
     // 4. GASへのリクエスト（GETリクエスト）
     final client = http.Client();
-    final uri = Uri.parse(gasUrl).replace(
+    final uri = Uri.parse(settings.gasUrl).replace(
       queryParameters: {
         'monthDay': monthDay,
         'time': time,
