@@ -3,7 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/email_service.dart'; // サービスファイルをインポート
+import '../services/settings_service.dart';
 import 'history_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,7 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ② 状態チェックと更新のロジック
   void _checkSentStatus() async {
-    // email_service.dart の関数を呼び出す
+    // 設定を取得してデバッグモードを確認
+    final settings = await SettingsService.getSettings();
+
+    // デバッグモードの場合は常に送信可能
+    if (settings.isDebugMode) {
+      setState(() {
+        _isSentToday = false;
+        _message = 'デバッグモード: 何度でも送信可能です。';
+      });
+      return;
+    }
+
+    // 通常モードの場合、email_service.dart の関数を呼び出す
     _isSentToday = await isSentToday();
 
     if (_isSentToday) {
@@ -82,15 +96,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // 送信処理の実行
     final result = await sendDailyEmail(time: time, chlorine: chlorine);
 
-    // 送信後に状態をチェック
-    _isSentToday = await isSentToday();
+    // 送信後に状態をチェック（デバッグモードも考慮）
+    _checkSentStatus();
 
     setState(() {
       // 送信結果をメッセージに設定
       _message = result;
-
-      // 送信が成功した場合、次回からボタンを無効化
-      // _isSentTodayは既に更新済み
     });
   }
 
@@ -109,6 +120,19 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             tooltip: '送信履歴',
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              // 設定画面から戻った時に状態を更新
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+              // 設定が変更された可能性があるので状態をチェック
+              _checkSentStatus();
+            },
+            tooltip: '設定',
           ),
         ],
       ),
