@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import '../services/history_service.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -16,6 +17,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeDateFormatting();
+  }
+
+  Future<void> _initializeDateFormatting() async {
+    await initializeDateFormatting('ja_JP', null);
     _loadHistories();
   }
 
