@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wq_report/config/keys.dart';
+import 'package:wq_report/services/history_service.dart';
 
 // ステップ1で取得したGASのWebアプリURLに置き換えてください
 const String gasUrl = gasWebAppURL;
@@ -64,16 +65,46 @@ Future<String> sendDailyEmail({
       if (jsonResponse['status'] == 'success') {
         // 3. 成功時：最終送信日を保存
         final prefs = await SharedPreferences.getInstance();
-        final currentDate = DateTime.now().toIso8601String();
-        await prefs.setString(lastSentDateKey, currentDate);
+        final currentDate = DateTime.now();
+        await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
+
+        // 履歴に保存
+        await HistoryService.addHistory(
+          date: currentDate,
+          time: time,
+          chlorine: chlorine,
+          success: true,
+        );
+
         return 'メールが正常に送信されました。';
       } else {
+        // 送信失敗時も履歴に保存
+        await HistoryService.addHistory(
+          date: DateTime.now(),
+          time: time,
+          chlorine: chlorine,
+          success: false,
+        );
         return '送信に失敗しました: ${jsonResponse['message']}';
       }
     } else {
+      // サーバーエラー時も履歴に保存
+      await HistoryService.addHistory(
+        date: DateTime.now(),
+        time: time,
+        chlorine: chlorine,
+        success: false,
+      );
       return 'サーバーエラーが発生しました (ステータスコード: ${response.statusCode})';
     }
   } catch (e) {
+    // 通信エラー時も履歴に保存
+    await HistoryService.addHistory(
+      date: DateTime.now(),
+      time: time,
+      chlorine: chlorine,
+      success: false,
+    );
     return '通信エラーが発生しました: $e';
   }
 }
