@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wq_report/config/keys.dart';
 import 'package:wq_report/services/history_service.dart';
+import 'package:wq_report/services/settings_service.dart';
 
 // ステップ1で取得したGASのWebアプリURLに置き換えてください
 const String gasUrl = gasWebAppURL;
@@ -44,19 +45,30 @@ Future<String> sendDailyEmail({
   }
 
   try {
-    // 2. 送信データの準備
+    // 2. 設定を取得
+    final settings = await SettingsService.getSettings();
+
+    // 3. 送信データの準備
     final now = DateTime.now();
     final monthDay =
         '${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final chlorineFormatted = chlorine.toStringAsFixed(2);
 
-    // 3. GASへのリクエスト
+    // デバッグモードに応じて送信先を決定
+    final recipientEmail = settings.isDebugMode
+        ? settings.testRecipientEmail
+        : settings.recipientEmail;
+
+    // 4. GASへのリクエスト
     final client = http.Client();
     final uri = Uri.parse(gasUrl).replace(
       queryParameters: {
         'monthDay': monthDay,
         'time': time,
         'chlorine': chlorineFormatted,
+        'locationNumber': settings.locationNumber,
+        'recipientEmail': recipientEmail,
+        'debugMode': settings.isDebugMode.toString(),
       },
     );
 
@@ -69,7 +81,7 @@ Future<String> sendDailyEmail({
 
       // 302の場合、レスポンスボディが空の可能性があるため、成功とみなす
       if (response.statusCode == 302 || jsonResponseBody.isEmpty) {
-        // 3. 成功時：最終送信日を保存
+        // 成功時：最終送信日を保存
         final prefs = await SharedPreferences.getInstance();
         final currentDate = DateTime.now();
         await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
@@ -82,14 +94,20 @@ Future<String> sendDailyEmail({
           success: true,
         );
 
-        return 'メールが正常に送信されました。';
+        // 設定を再取得してメッセージに含める
+        final currentSettings = await SettingsService.getSettings();
+        final modeMessage = currentSettings.isDebugMode
+            ? '（テストモード: ${currentSettings.testRecipientEmail}）'
+            : '（通常モード: ${currentSettings.recipientEmail}）';
+
+        return 'メールが正常に送信されました。$modeMessage';
       }
 
       // 200の場合、JSONレスポンスを確認
       try {
         final jsonResponse = json.decode(jsonResponseBody);
         if (jsonResponse['status'] == 'success') {
-          // 3. 成功時：最終送信日を保存
+          // 成功時：最終送信日を保存
           final prefs = await SharedPreferences.getInstance();
           final currentDate = DateTime.now();
           await prefs.setString(lastSentDateKey, currentDate.toIso8601String());
@@ -102,7 +120,13 @@ Future<String> sendDailyEmail({
             success: true,
           );
 
-          return 'メールが正常に送信されました。';
+          // 設定を再取得してメッセージに含める
+          final currentSettings = await SettingsService.getSettings();
+          final modeMessage = currentSettings.isDebugMode
+              ? '（テストモード: ${currentSettings.testRecipientEmail}）'
+              : '（通常モード: ${currentSettings.recipientEmail}）';
+
+          return 'メールが正常に送信されました。$modeMessage';
         } else {
           // 送信失敗時も履歴に保存
           await HistoryService.addHistory(
@@ -127,7 +151,13 @@ Future<String> sendDailyEmail({
           success: true,
         );
 
-        return 'メールが正常に送信されました。';
+        // 設定を再取得してメッセージに含める
+        final currentSettings = await SettingsService.getSettings();
+        final modeMessage = currentSettings.isDebugMode
+            ? '（テストモード: ${currentSettings.testRecipientEmail}）'
+            : '（通常モード: ${currentSettings.recipientEmail}）';
+
+        return 'メールが正常に送信されました。$modeMessage';
       }
     } else {
       // サーバーエラー時も履歴に保存

@@ -37,42 +37,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
-  Future<void> _addTestData() async {
-    // テスト用のダミーデータを追加
-    final baseDate = DateTime.now();
-    final testData = [
-      (0, '0950', 0.42, true),
-      (1, '0955', 0.38, true),
-      (2, '1005', 0.45, false),
-      (3, '0945', 0.40, true),
-      (4, '0950', 0.43, true),
-      (7, '0955', 0.39, true),
-      (8, '1000', 0.41, true),
-      (9, '0945', 0.44, false),
-      (10, '0950', 0.40, true),
-      (14, '0955', 0.42, true),
-    ];
-
-    for (final (dayOffset, time, chlorine, success) in testData) {
-      final date = baseDate.subtract(Duration(days: dayOffset));
-      await HistoryService.addHistory(
-        date: date,
-        time: time,
-        chlorine: chlorine,
-        success: success,
-      );
-    }
-
-    // データ追加後に再読み込み
-    _loadHistories();
-
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('テストデータを追加しました')));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,13 +46,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _addTestData,
-            tooltip: 'テストデータ追加',
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadHistories,
+            tooltip: '履歴を更新',
           ),
         ],
       ),
