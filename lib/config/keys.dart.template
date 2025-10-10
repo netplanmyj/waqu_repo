@@ -1,0 +1,5 @@
+// GAS - テンプレートファイル（テスト用）
+// 本番環境では keys.dart に実際の値を設定してください
+// テスト用のダミーURL - 実際のメール送信は行われません
+const String gasDeployID = "DUMMY_DEPLOY_ID_FOR_TESTING";
+const String gasWebAppURL = "https://httpbin.org/post"; // テスト用エンドポイント
