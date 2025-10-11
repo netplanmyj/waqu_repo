@@ -118,7 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('設定'),
-          backgroundColor: Colors.blue[600],
+          backgroundColor: Colors.grey[600],
           foregroundColor: Colors.white,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -128,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('設定'),
-        backgroundColor: Colors.blue[600],
+        backgroundColor: Colors.grey[600],
         foregroundColor: Colors.white,
       ),
       body: Form(

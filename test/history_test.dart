@@ -96,34 +96,28 @@ void main() {
       expect(histories.first.isDebugMode, true);
     });
 
-    test('古い履歴が自動削除される', () async {
-      final oldDate = DateTime.now().subtract(
-        const Duration(days: 40),
-      ); // 5週間以上前
-      final recentDate = DateTime.now().subtract(const Duration(days: 10));
-
-      // 古い履歴を追加
-      await HistoryService.addHistory(
-        date: oldDate,
-        time: '1000',
-        chlorine: 0.30,
-        success: true,
-        isDebugMode: false,
-      );
-
-      // 最近の履歴を追加
-      await HistoryService.addHistory(
-        date: recentDate,
-        time: '0950',
-        chlorine: 0.45,
-        success: true,
-        isDebugMode: false,
-      );
+    test('直近50件のみ保持される', () async {
+      // 51件の履歴を追加
+      for (int i = 0; i < 51; i++) {
+        await HistoryService.addHistory(
+          date: DateTime.now().subtract(Duration(days: i)),
+          time: '1000',
+          chlorine: 0.30 + (i * 0.01),
+          success: true,
+          isDebugMode: false,
+        );
+      }
 
       final histories = await HistoryService.getHistories();
-      // 古い履歴は削除され、最近の履歴のみ残っていることを確認
-      expect(histories, hasLength(1));
-      expect(histories.first.date.day, recentDate.day);
+
+      // 直近50件のみ保持されることを確認
+      expect(histories, hasLength(50));
+
+      // 最新のデータが残っていることを確認
+      expect(histories.first.chlorine, 0.30);
+
+      // 最も古いデータは49日前のもの（0日目から数えて50件目）
+      expect(histories.last.chlorine, closeTo(0.79, 0.01));
     });
 
     test('JSON serialization/deserializationが正しく動作する', () {

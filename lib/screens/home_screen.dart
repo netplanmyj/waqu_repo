@@ -110,6 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('水質報告メール送信'),
+        backgroundColor: Colors.blue[600],
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.history),

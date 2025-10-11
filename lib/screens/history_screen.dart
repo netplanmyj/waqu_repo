@@ -42,7 +42,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('送信履歴'),
-        backgroundColor: Colors.blue[600],
+        backgroundColor: Colors.grey[600],
         foregroundColor: Colors.white,
       ),
       body: isLoading

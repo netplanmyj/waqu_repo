@@ -39,7 +39,7 @@ class EmailHistory {
 
 class HistoryService {
   static const String historyKey = 'email_history';
-  static const int maxHistoryDays = 35; // 5週間分
+  static const int maxHistoryCount = 50; // 直近50件
 
   // 履歴を保存
   static Future<void> addHistory({
@@ -63,14 +63,13 @@ class HistoryService {
 
     histories.add(newHistory);
 
-    // 古い履歴を削除（5週間以前）
-    final cutoffDate = DateTime.now().subtract(
-      const Duration(days: maxHistoryDays),
-    );
-    histories.removeWhere((history) => history.date.isBefore(cutoffDate));
-
     // 日付順でソート（新しい順）
     histories.sort((a, b) => b.date.compareTo(a.date));
+
+    // 直近50件のみ保持（古いものを削除）
+    if (histories.length > maxHistoryCount) {
+      histories.removeRange(maxHistoryCount, histories.length);
+    }
 
     // SharedPreferencesに保存
     final historyJsonList = histories.map((h) => h.toJson()).toList();
