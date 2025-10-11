@@ -1,6 +1,6 @@
 name: wq_report
-description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: "Water Quality Reporter - 水質報告アプリ"
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
@@ -18,6 +18,26 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
 
 flutter:
   uses-material-design: true
+  
+  # アイコンファイル（生成後に自動的に参照されます）
+  assets:
+    - assets/icon/
+
+# アプリアイコン自動生成設定
+# 使い方: flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false  # Android専用のためfalse
+  image_path: "assets/icon/icon.png"
+  
+  # Android適応型アイコン（Android 8.0以降）
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  adaptive_icon_background: "#2196F3"  # Material Blue 500
+  
+  # Android設定
+  android_gravity: "center"
+  android_min_sdk_android: 21
