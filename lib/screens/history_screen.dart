@@ -86,7 +86,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '過去5週間分の送信履歴を表示しています',
+                  '直近50件の送信履歴を表示しています',
                   style: TextStyle(color: Colors.blue[700], fontSize: 14),
                 ),
               ),
@@ -113,6 +113,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
+        onTap: !history.success && history.errorMessage != null
+            ? () => _showErrorDialog(history)
+            : null,
         leading: CircleAvatar(
           backgroundColor: history.success
               ? Colors.green[100]
@@ -199,9 +202,93 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fontSize: 12,
               ),
             ),
+            if (!history.success && history.errorMessage != null)
+              Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
           ],
         ),
       ),
+    );
+  }
+
+  void _showErrorDialog(EmailHistory history) {
+    final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[700]),
+            const SizedBox(width: 8),
+            const Text('送信エラー詳細'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                dateFormat.format(history.date),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildInfoRow('測定時刻', history.time),
+              const SizedBox(height: 8),
+              _buildInfoRow(
+                '残留塩素',
+                '${history.chlorine.toStringAsFixed(2)} mg/L',
+              ),
+              const Divider(height: 24),
+              Text(
+                'エラー内容',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red[700],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                history.errorMessage ?? '不明なエラー',
+                style: TextStyle(color: Colors.grey[800]),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('閉じる'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
     );
   }
 

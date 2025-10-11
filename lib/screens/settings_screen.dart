@@ -58,11 +58,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
+    // URLの前後の空白・改行を削除
+    final cleanedGasUrl = _gasUrlController.text.trim().replaceAll('\n', '');
+
     final settings = AppSettings(
-      gasUrl: _gasUrlController.text,
-      locationNumber: _locationNumberController.text,
-      recipientEmail: _recipientEmailController.text,
-      testRecipientEmail: _testRecipientEmailController.text,
+      gasUrl: cleanedGasUrl,
+      locationNumber: _locationNumberController.text.trim(),
+      recipientEmail: _recipientEmailController.text.trim(),
+      testRecipientEmail: _testRecipientEmailController.text.trim(),
       isDebugMode: _isDebugMode,
     );
 
@@ -154,10 +157,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         labelText: 'GAS WebアプリURL',
                         hintText: 'https://script.google.com/macros/s/.../exec',
                         border: OutlineInputBorder(),
-                        helperText: 'あなた専用のGoogle Apps Script WebアプリURLを入力',
+                        helperText:
+                            'デプロイしたGAS WebアプリのURLを正確に入力してください\n例: https://script.google.com/macros/s/AKfycb.../exec',
+                        helperMaxLines: 3,
                       ),
                       keyboardType: TextInputType.url,
                       validator: _validateGasUrl,
+                      maxLines: 3,
+                      minLines: 1,
                     ),
                   ],
                 ),
