@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wq_report/services/history_service.dart';
@@ -64,6 +65,10 @@ Future<String> sendDailyEmail({
 
     // 4. GASへのリクエスト（GETリクエスト）
     final client = http.Client();
+
+    debugPrint('🔧 保存されているGAS URL: [${settings.gasUrl}]');
+    debugPrint('🔧 URL長: ${settings.gasUrl.length} 文字');
+
     final uri = Uri.parse(settings.gasUrl).replace(
       queryParameters: {
         'monthDay': monthDay,
@@ -75,7 +80,20 @@ Future<String> sendDailyEmail({
       },
     );
 
-    final response = await client.get(uri);
+    debugPrint('📤 送信リクエスト: $uri');
+
+    final response = await client
+        .get(uri)
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            throw Exception('タイムアウト: サーバーからの応答がありません');
+          },
+        );
+
+    debugPrint('📥 レスポンスステータス: ${response.statusCode}');
+    debugPrint('📥 レスポンスボディ: ${response.body}');
+
     client.close(); // 200 (OK) と 302 (Found/Redirect) の両方を成功として扱う
     if (response.statusCode == 200 || response.statusCode == 302) {
       String jsonResponseBody = response.body;
@@ -139,14 +157,16 @@ Future<String> sendDailyEmail({
           return 'メールが正常に送信されました。$modeMessage';
         } else {
           // 送信失敗時も履歴に保存
+          final errorMsg = '送信に失敗しました: ${jsonResponse['message']}';
           await HistoryService.addHistory(
             date: DateTime.now(),
             time: time,
             chlorine: chlorine,
             success: false,
             isDebugMode: settings.isDebugMode,
+            errorMessage: errorMsg,
           );
-          return '送信に失敗しました: ${jsonResponse['message']}';
+          return errorMsg;
         }
       } catch (e) {
         // JSONパースエラーの場合も成功とみなす（302リダイレクトの可能性）
@@ -177,16 +197,38 @@ Future<String> sendDailyEmail({
       }
     } else {
       // サーバーエラー時も履歴に保存
+      final errorMsg = 'サーバーエラーが発生しました (ステータスコード: ${response.statusCode})';
       await HistoryService.addHistory(
         date: DateTime.now(),
         time: time,
         chlorine: chlorine,
         success: false,
         isDebugMode: settings.isDebugMode,
+        errorMessage: errorMsg,
       );
-      return 'サーバーエラーが発生しました (ステータスコード: ${response.statusCode})';
+      return errorMsg;
     }
   } catch (e) {
+    debugPrint('❌ エラー詳細: $e');
+
+    // エラーメッセージを分かりやすく
+    String errorMessage = '通信エラーが発生しました';
+    if (e.toString().contains('no address associated with hostname') ||
+        e.toString().contains('Failed host lookup')) {
+      errorMessage = 'GAS URLが正しくありません\n設定画面でURLを確認してください';
+    } else if (e.toString().contains('SocketException')) {
+      errorMessage = 'インターネット接続を確認してください';
+    } else if (e.toString().contains('TimeoutException') ||
+        e.toString().contains('タイムアウト')) {
+      errorMessage = 'サーバーからの応答がありません（タイムアウト）';
+    } else if (e.toString().contains('HandshakeException')) {
+      errorMessage = 'SSL証明書エラー';
+    } else if (e.toString().contains('FormatException')) {
+      errorMessage = 'GAS URLの形式が正しくありません';
+    }
+
+    final fullErrorMessage = '$errorMessage\n\n技術詳細: ${e.toString()}';
+
     // 通信エラー時も履歴に保存
     await HistoryService.addHistory(
       date: DateTime.now(),
@@ -194,7 +236,9 @@ Future<String> sendDailyEmail({
       chlorine: chlorine,
       success: false,
       isDebugMode: settings.isDebugMode,
+      errorMessage: fullErrorMessage,
     );
-    return '通信エラーが発生しました: $e';
+
+    return fullErrorMessage;
   }
 }

@@ -7,6 +7,7 @@ class EmailHistory {
   final double chlorine;
   final bool success;
   final bool isDebugMode;
+  final String? errorMessage; // エラーメッセージ（失敗時のみ）
 
   EmailHistory({
     required this.date,
@@ -14,6 +15,7 @@ class EmailHistory {
     required this.chlorine,
     required this.success,
     this.isDebugMode = false, // デフォルトはfalse（既存データとの互換性のため）
+    this.errorMessage,
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +25,7 @@ class EmailHistory {
       'chlorine': chlorine,
       'success': success,
       'isDebugMode': isDebugMode,
+      'errorMessage': errorMessage,
     };
   }
 
@@ -33,6 +36,7 @@ class EmailHistory {
       chlorine: json['chlorine'],
       success: json['success'],
       isDebugMode: json['isDebugMode'] ?? false, // 既存データとの互換性のため
+      errorMessage: json['errorMessage'],
     );
   }
 }
@@ -48,6 +52,7 @@ class HistoryService {
     required double chlorine,
     required bool success,
     bool isDebugMode = false,
+    String? errorMessage,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final histories = await getHistories();
@@ -59,6 +64,7 @@ class HistoryService {
       chlorine: chlorine,
       success: success,
       isDebugMode: isDebugMode,
+      errorMessage: errorMessage,
     );
 
     histories.add(newHistory);
