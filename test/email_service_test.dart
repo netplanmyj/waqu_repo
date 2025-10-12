@@ -3,8 +3,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:wq_report/services/email_service.dart';
-import 'package:wq_report/services/settings_service.dart';
+import 'package:waqu_repo/services/email_service.dart';
+import 'package:waqu_repo/services/settings_service.dart';
 
 void main() {
   group('メール送信サービステスト', () {

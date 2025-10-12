@@ -237,7 +237,7 @@ adaptive_icon_background: "#64B5F6"
 ```yaml
 # pubspec.yaml
 
-name: wq_report
+name: waqu_repo
 description: "Water Quality Reporter - 水質報告アプリ"
 publish_to: 'none'
 version: 1.0.0+1

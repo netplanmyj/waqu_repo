@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "jp.netplan.wqreport" "\0"
-            VALUE "FileDescription", "wq_report" "\0"
+            VALUE "FileDescription", "waqu_repo" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "wq_report" "\0"
+            VALUE "InternalName", "waqu_repo" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 jp.netplan.wqreport. All rights reserved." "\0"
-            VALUE "OriginalFilename", "wq_report.exe" "\0"
-            VALUE "ProductName", "wq_report" "\0"
+            VALUE "OriginalFilename", "waqu_repo.exe" "\0"
+            VALUE "ProductName", "waqu_repo" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

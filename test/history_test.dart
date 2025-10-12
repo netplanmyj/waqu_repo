@@ -5,8 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:wq_report/screens/history_screen.dart';
-import 'package:wq_report/services/history_service.dart';
+import 'package:waqu_repo/screens/history_screen.dart';
+import 'package:waqu_repo/services/history_service.dart';
 
 void main() {
   group('履歴サービステスト', () {

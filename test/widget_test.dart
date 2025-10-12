@@ -9,7 +9,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:wq_report/main.dart';
+import 'package:waqu_repo/main.dart';
 
 void main() {
   group('水質報告アプリの基本UI表示テスト', () {

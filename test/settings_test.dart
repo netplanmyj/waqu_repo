@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wq_report/screens/settings_screen.dart';
-import 'package:wq_report/services/settings_service.dart';
+import 'package:waqu_repo/screens/settings_screen.dart';
+import 'package:waqu_repo/services/settings_service.dart';
 
 void main() {
   group('SettingsServiceテスト', () {

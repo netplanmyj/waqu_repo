@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wq_report/screens/home_screen.dart';
+import 'package:waqu_repo/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());

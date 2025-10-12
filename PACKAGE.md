@@ -6,8 +6,8 @@
 
 ### 基本構成
 ```
-wq_report_release_v1.0.0/
-├── 📱 wq_report_v1.0.0.apk         # Androidアプリ本体
+waqu_repo_release_v1.0.0/
+├── 📱 waqu_repo_v1.0.0.apk         # Androidアプリ本体
 ├── 🚀 QUICKSTART.md                # 5分で始める簡単ガイド
 ├── 📖 DEPLOY.md                    # 詳細セットアップ手順
 ├── 📋 README.md                    # プロジェクト概要
@@ -25,7 +25,7 @@ wq_report_release_v1.0.0/
 
 ```bash
 # プロジェクトディレクトリに移動
-cd wq_report
+cd waqu_repo
 
 # 依存関係の更新
 flutter pub get
@@ -34,18 +34,18 @@ flutter pub get
 flutter build apk --release
 
 # APKファイルをわかりやすい名前でコピー
-cp build/app/outputs/flutter-apk/app-release.apk wq_report_v1.0.0.apk
+cp build/app/outputs/flutter-apk/app-release.apk waqu_repo_v1.0.0.apk
 ```
 
 ### ステップ2: 配布ディレクトリの作成
 
 ```bash
 # 配布用ディレクトリを作成
-mkdir wq_report_release_v1.0.0
-cd wq_report_release_v1.0.0
+mkdir waqu_repo_release_v1.0.0
+cd waqu_repo_release_v1.0.0
 
 # APKファイルをコピー
-cp ../wq_report_v1.0.0.apk .
+cp ../waqu_repo_v1.0.0.apk .
 
 # ドキュメントファイルをコピー
 cp ../QUICKSTART.md .
@@ -72,7 +72,7 @@ cat > INSTALL.md << 'EOF'
 3. 「提供元不明のアプリ」または「不明なソースからのアプリ」を許可
 
 ### インストール手順
-1. `wq_report_v1.0.0.apk` ファイルをAndroidデバイスにダウンロード
+1. `waqu_repo_v1.0.0.apk` ファイルをAndroidデバイスにダウンロード
 2. APKファイルをタップしてインストール実行
 3. 「インストール」をタップして完了
 
@@ -113,10 +113,10 @@ ls -lh *.apk
 cd ..
 
 # ZIPファイルを作成
-zip -r wq_report_release_v1.0.0.zip wq_report_release_v1.0.0/
+zip -r waqu_repo_release_v1.0.0.zip waqu_repo_release_v1.0.0/
 
 # ZIPファイルのサイズ確認
-ls -lh wq_report_release_v1.0.0.zip
+ls -lh waqu_repo_release_v1.0.0.zip
 ```
 
 ## 📋 配布前チェックリスト
@@ -144,7 +144,7 @@ ls -lh wq_report_release_v1.0.0.zip
 ### 選択肢1: 直接配布
 ```bash
 # USBドライブにコピー
-cp wq_report_release_v1.0.0.zip /path/to/usb/
+cp waqu_repo_release_v1.0.0.zip /path/to/usb/
 
 # メール添付で送信（サイズに注意）
 ```
@@ -171,7 +171,7 @@ cp wq_report_release_v1.0.0.zip /path/to/usb/
 
 ### リリースノートの作成
 ```markdown
-## wq_report v1.0.0 リリースノート
+## waqu_repo v1.0.0 リリースノート
 
 ### 新機能
 - 水質報告の自動メール送信
@@ -191,10 +191,10 @@ cp wq_report_release_v1.0.0.zip /path/to/usb/
 ### APKファイルの検証
 ```bash
 # APKのハッシュ値を計算（改ざん検知用）
-shasum -a 256 wq_report_v1.0.0.apk > checksum.txt
+shasum -a 256 waqu_repo_v1.0.0.apk > checksum.txt
 
 # ZIPファイルにチェックサムを含める
-cp checksum.txt wq_report_release_v1.0.0/
+cp checksum.txt waqu_repo_release_v1.0.0/
 ```
 
 ### 配布時の注意

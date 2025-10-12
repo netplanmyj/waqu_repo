@@ -1,4 +1,4 @@
-name: wq_report
+name: waqu_repo
 description: "Water Quality Reporter - 水質報告アプリ"
 publish_to: 'none'
 version: 1.0.0+1

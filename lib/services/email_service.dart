@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wq_report/services/history_service.dart';
-import 'package:wq_report/services/settings_service.dart';
+import 'package:waqu_repo/services/history_service.dart';
+import 'package:waqu_repo/services/settings_service.dart';
 
 // 日付を保存するキー
 const String lastSentDateKey = 'lastSentDate';

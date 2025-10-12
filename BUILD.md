@@ -23,7 +23,7 @@ flutter doctor
 
 ```bash
 git clone <repository-url>
-cd wq_report
+cd waqu_repo
 ```
 
 ### ステップ2: 依存関係のインストール
@@ -67,7 +67,7 @@ ls -la build/app/outputs/flutter-apk/
 わかりやすい名前に変更：
 
 ```bash
-cp build/app/outputs/flutter-apk/app-release.apk wq_report_v1.0.0.apk
+cp build/app/outputs/flutter-apk/app-release.apk waqu_repo_v1.0.0.apk
 ```
 
 ### APKファイルの動作テスト
@@ -151,8 +151,8 @@ version: 1.0.0+1
 ### 配布用ファイル構成
 
 ```
-wq_report-release/
-├── wq_report_v1.0.0.apk    # メインAPKファイル
+waqu_repo-release/
+├── waqu_repo_v1.0.0.apk    # メインAPKファイル
 ├── INSTALL.md              # インストール手順書
 ├── DEPLOY.md               # GAS設定手順書
 ├── gas/                    # GASコードファイル
