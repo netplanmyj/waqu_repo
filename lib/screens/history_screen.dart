@@ -116,6 +116,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         onTap: !history.success && history.errorMessage != null
             ? () => _showErrorDialog(history)
             : null,
+        onLongPress: history.isDebugMode
+            ? () => _showDeleteConfirmDialog(history)
+            : null,
         leading: CircleAvatar(
           backgroundColor: history.success
               ? Colors.green[100]
@@ -290,6 +293,83 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ],
     );
+  }
+
+  void _showDeleteConfirmDialog(EmailHistory history) {
+    final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.delete_outline, color: Colors.orange[700]),
+            const SizedBox(width: 8),
+            const Text('デバッグ履歴の削除'),
+          ],
+        ),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('この送信履歴を削除しますか？'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dateFormat.format(history.date),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('測定時刻: ${history.time}'),
+                  Text('残留塩素: ${history.chlorine.toStringAsFixed(2)} mg/L'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _deleteHistory(history);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red[700]),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteHistory(EmailHistory history) async {
+    await HistoryService.deleteHistory(history);
+
+    // 履歴を再読み込み
+    final updatedHistories = await HistoryService.getHistories();
+    setState(() {
+      histories = updatedHistories;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('履歴を削除しました'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   bool _isToday(DateTime date) {
