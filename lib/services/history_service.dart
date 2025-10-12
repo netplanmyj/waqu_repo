@@ -111,6 +111,24 @@ class HistoryService {
     return null;
   }
 
+  // 特定の履歴を削除
+  static Future<void> deleteHistory(EmailHistory historyToDelete) async {
+    final prefs = await SharedPreferences.getInstance();
+    final histories = await getHistories();
+
+    // 削除対象の履歴を除外
+    histories.removeWhere(
+      (history) =>
+          history.date.isAtSameMomentAs(historyToDelete.date) &&
+          history.time == historyToDelete.time &&
+          history.chlorine == historyToDelete.chlorine,
+    );
+
+    // SharedPreferencesに保存
+    final historyJsonList = histories.map((h) => h.toJson()).toList();
+    await prefs.setString(historyKey, json.encode(historyJsonList));
+  }
+
   // 履歴をクリア（テスト用）
   static Future<void> clearHistory() async {
     final prefs = await SharedPreferences.getInstance();

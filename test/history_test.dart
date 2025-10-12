@@ -299,5 +299,122 @@ void main() {
       expect(find.textContaining('0950'), findsOneWidget);
       expect(find.textContaining('1030'), findsOneWidget);
     });
+
+    testWidgets('デバッグ履歴を長押しすると削除ダイアログが表示される', (WidgetTester tester) async {
+      // デバッグモードの履歴を追加
+      await HistoryService.addHistory(
+        date: DateTime.now(),
+        time: '0950',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: true,
+      );
+
+      await tester.pumpWidget(MaterialApp(home: const HistoryScreen()));
+      await tester.pumpAndSettle();
+
+      // デバッグラベルが表示されることを確認
+      expect(find.text('デバッグ'), findsOneWidget);
+
+      // ListTileを長押し
+      await tester.longPress(find.byType(ListTile));
+      await tester.pumpAndSettle();
+
+      // 削除ダイアログが表示されることを確認
+      expect(find.text('デバッグ履歴の削除'), findsOneWidget);
+      expect(find.text('この送信履歴を削除しますか？'), findsOneWidget);
+      expect(find.text('キャンセル'), findsOneWidget);
+      expect(find.text('削除'), findsOneWidget);
+    });
+
+    testWidgets('通常の送信履歴を長押ししても削除ダイアログが表示されない', (WidgetTester tester) async {
+      // 通常モードの履歴を追加
+      await HistoryService.addHistory(
+        date: DateTime.now(),
+        time: '0950',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: false,
+      );
+
+      await tester.pumpWidget(MaterialApp(home: const HistoryScreen()));
+      await tester.pumpAndSettle();
+
+      // デバッグラベルが表示されないことを確認
+      expect(find.text('デバッグ'), findsNothing);
+
+      // ListTileを長押し
+      await tester.longPress(find.byType(ListTile));
+      await tester.pumpAndSettle();
+
+      // 削除ダイアログが表示されないことを確認
+      expect(find.text('デバッグ履歴の削除'), findsNothing);
+      expect(find.text('この送信履歴を削除しますか？'), findsNothing);
+    });
+
+    testWidgets('削除ボタンをタップすると履歴が削除される', (WidgetTester tester) async {
+      // デバッグモードの履歴を追加
+      await HistoryService.addHistory(
+        date: DateTime.now(),
+        time: '0950',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: true,
+      );
+
+      await tester.pumpWidget(MaterialApp(home: const HistoryScreen()));
+      await tester.pumpAndSettle();
+
+      // 履歴が1件表示されることを確認
+      expect(find.byType(Card), findsOneWidget);
+
+      // ListTileを長押し
+      await tester.longPress(find.byType(ListTile));
+      await tester.pumpAndSettle();
+
+      // 削除ボタンをタップ
+      await tester.tap(find.text('削除'));
+      await tester.pumpAndSettle();
+
+      // 削除完了のSnackBarが表示されることを確認
+      expect(find.text('履歴を削除しました'), findsOneWidget);
+
+      // 履歴が削除されて空状態になることを確認
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+      expect(find.text('送信履歴がありません'), findsOneWidget);
+    });
+
+    testWidgets('キャンセルボタンをタップすると履歴が削除されない', (WidgetTester tester) async {
+      // デバッグモードの履歴を追加
+      await HistoryService.addHistory(
+        date: DateTime.now(),
+        time: '0950',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: true,
+      );
+
+      await tester.pumpWidget(MaterialApp(home: const HistoryScreen()));
+      await tester.pumpAndSettle();
+
+      // 履歴が1件表示されることを確認
+      expect(find.byType(Card), findsOneWidget);
+
+      // ListTileを長押し
+      await tester.longPress(find.byType(ListTile));
+      await tester.pumpAndSettle();
+
+      // キャンセルボタンをタップ
+      await tester.tap(find.text('キャンセル'));
+      await tester.pumpAndSettle();
+
+      // ダイアログが閉じることを確認
+      expect(find.text('デバッグ履歴の削除'), findsNothing);
+
+      // 履歴が残っていることを確認（Cardが存在）
+      expect(find.byType(Card), findsOneWidget);
+      // 測定時刻が含まれるテキストが表示されていることを確認
+      expect(find.textContaining('0950'), findsOneWidget);
+    });
   });
 }

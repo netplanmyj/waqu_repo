@@ -66,9 +66,6 @@ Future<String> sendDailyEmail({
     // 4. GASへのリクエスト（GETリクエスト）
     final client = http.Client();
 
-    debugPrint('🔧 保存されているGAS URL: [${settings.gasUrl}]');
-    debugPrint('🔧 URL長: ${settings.gasUrl.length} 文字');
-
     final uri = Uri.parse(settings.gasUrl).replace(
       queryParameters: {
         'monthDay': monthDay,
@@ -80,8 +77,6 @@ Future<String> sendDailyEmail({
       },
     );
 
-    debugPrint('📤 送信リクエスト: $uri');
-
     final response = await client
         .get(uri)
         .timeout(
@@ -90,9 +85,6 @@ Future<String> sendDailyEmail({
             throw Exception('タイムアウト: サーバーからの応答がありません');
           },
         );
-
-    debugPrint('📥 レスポンスステータス: ${response.statusCode}');
-    debugPrint('📥 レスポンスボディ: ${response.body}');
 
     client.close(); // 200 (OK) と 302 (Found/Redirect) の両方を成功として扱う
     if (response.statusCode == 200 || response.statusCode == 302) {
