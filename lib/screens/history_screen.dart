@@ -107,7 +107,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildHistoryCard(EmailHistory history) {
-    final dateFormat = DateFormat('M月d日 (E)', 'ja_JP');
+    final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
     final isToday = _isToday(history.date);
 
     return Card(
@@ -116,9 +116,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         onTap: !history.success && history.errorMessage != null
             ? () => _showErrorDialog(history)
             : null,
-        onLongPress: history.isDebugMode
-            ? () => _showDeleteConfirmDialog(history)
-            : null,
+        onLongPress: () => _showDeleteConfirmDialog(history),
         leading: CircleAvatar(
           backgroundColor: history.success
               ? Colors.green[100]
@@ -130,30 +128,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         title: Row(
           children: [
-            Text(
-              dateFormat.format(history.date),
-              style: TextStyle(
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: isToday ? Colors.blue[700] : null,
+            Flexible(
+              child: Text(
+                dateFormat.format(history.date),
+                style: TextStyle(
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  color: isToday ? Colors.blue[700] : null,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (isToday)
-              Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.blue[100],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '今日',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.blue[700],
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             if (history.isDebugMode)
               Container(
                 margin: const EdgeInsets.only(left: 8),
@@ -305,7 +289,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             Icon(Icons.delete_outline, color: Colors.orange[700]),
             const SizedBox(width: 8),
-            const Text('デバッグ履歴の削除'),
+            const Text('送信履歴の削除'),
           ],
         ),
         content: Column(
