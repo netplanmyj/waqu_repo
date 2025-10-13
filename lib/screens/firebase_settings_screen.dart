@@ -119,44 +119,6 @@ class _FirebaseSettingsScreenState extends State<FirebaseSettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // 認証状態表示
-            Card(
-              color: Colors.blue[50],
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.account_circle, color: Colors.blue[600]),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Google認証状態',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(color: Colors.blue[600]),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '✅ ${AuthService.userEmail ?? "不明"} でサインイン済み',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Gmail送信権限: 有効',
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // 地点番号
             Card(
               child: Padding(
@@ -282,6 +244,56 @@ class _FirebaseSettingsScreenState extends State<FirebaseSettingsScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 32),
+
+            // 保存ボタン
+            ElevatedButton(
+              onPressed: _saveSettings,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[600],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text('設定を保存', style: TextStyle(fontSize: 16)),
+            ),
+            const SizedBox(height: 32),
+
+            // 認証状態表示
+            Card(
+              color: Colors.blue[50],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.account_circle, color: Colors.blue[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Google認証状態',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: Colors.blue[600]),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '✅ ${AuthService.userEmail ?? "不明"} でサインイン済み',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Gmail送信権限: 有効',
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Firebase Functions説明
@@ -320,18 +332,6 @@ class _FirebaseSettingsScreenState extends State<FirebaseSettingsScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 32),
-
-            // 保存ボタン
-            ElevatedButton(
-              onPressed: _saveSettings,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text('設定を保存', style: TextStyle(fontSize: 16)),
             ),
           ],
         ),

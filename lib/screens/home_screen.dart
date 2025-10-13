@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ① 画面の状態を管理する変数
   bool _isSentToday = false;
   String _message = 'メッセージを送信できます。';
+  bool _isDebugMode = false; // デバッグモードの状態を保持
 
   // ② 入力フォーム用のコントローラー
   final TextEditingController _timeController = TextEditingController();
@@ -42,6 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _checkSentStatus() async {
     // 設定を取得してデバッグモードを確認
     final settings = await SettingsService.getSettings();
+
+    // デバッグモードの状態を保存
+    if (mounted) {
+      setState(() {
+        _isDebugMode = settings.isDebugMode;
+      });
+    }
 
     // デバッグモードの場合は常に送信可能
     if (settings.isDebugMode) {
@@ -126,14 +134,27 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.blue[600],
         foregroundColor: Colors.white,
         actions: [
-          // ユーザー情報表示
+          // ユーザー情報表示（デバッグモード時はダミー情報）
           if (AuthService.userEmail != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Center(
-                child: Text(
-                  AuthService.userEmail!.split('@')[0],
-                  style: const TextStyle(fontSize: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // デバッグモード時はアイコンを表示
+                    if (_isDebugMode)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 4.0),
+                        child: Icon(Icons.bug_report, size: 14),
+                      ),
+                    Text(
+                      _isDebugMode
+                          ? 'demo-user' // デバッグモード時のダミー名
+                          : AuthService.userEmail!.split('@')[0],
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -188,6 +209,39 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
             itemBuilder: (context) => [
+              // ユーザー情報表示（デバッグモード時はダミー）
+              if (AuthService.userEmail != null)
+                PopupMenuItem<String>(
+                  enabled: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.person, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            _isDebugMode
+                                ? 'Demo User'
+                                : AuthService.userName ?? 'ユーザー',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _isDebugMode
+                            ? 'demo@example.com'
+                            : AuthService.userEmail!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const Divider(),
+                    ],
+                  ),
+                ),
               const PopupMenuItem<String>(
                 value: 'signout',
                 child: Row(
