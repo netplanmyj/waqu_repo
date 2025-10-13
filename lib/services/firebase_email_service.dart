@@ -94,13 +94,28 @@ Future<String> sendDailyEmailWithFirebase({
     }
 
     // 4. Firebase Functions呼び出し
-    // リージョンを明示的に指定（us-central1）
-    final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
-    final callable = functions.httpsCallable('sendWaterQualityEmail');
-
     // Firebase認証状態の確認
     debugPrint('🔐 Firebase Auth UID: ${AuthService.currentUser?.uid}');
     debugPrint('📧 Firebase Auth Email: ${AuthService.userEmail}');
+
+    // CRITICAL: Firebase Authトークンを明示的にリフレッシュ
+    debugPrint('🔄 Firebase IDトークンをリフレッシュ中...');
+    final firebaseToken = await AuthService.currentUser?.getIdToken(
+      true,
+    ); // true = force refresh
+    if (firebaseToken != null) {
+      debugPrint(
+        '🎫 Firebase IDトークン取得成功: ${firebaseToken.substring(0, 50)}...',
+      );
+      debugPrint('🎫 Firebase IDトークン長: ${firebaseToken.length}');
+    } else {
+      debugPrint('❌ Firebase IDトークンがnull！');
+      return 'Firebase認証トークンの取得に失敗しました。再度サインインしてください。';
+    }
+
+    // リージョンを明示的に指定（us-central1）
+    final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+    final callable = functions.httpsCallable('sendWaterQualityEmail');
 
     // アクセストークンのログ出力（デバッグ用）
     debugPrint(
