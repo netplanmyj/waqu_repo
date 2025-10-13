@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import {google} from "googleapis";
+import * as nodemailer from "nodemailer";
 
 // Firebase Admin SDKの初期化
 admin.initializeApp();
@@ -14,15 +14,17 @@ export const sendWaterQualityEmail = functions.https.onCall(
           hasAuth: !!context.auth,
           authUid: context.auth?.uid,
           authEmail: context.auth?.token?.email,
+          timestamp: new Date().toISOString(),
         });
 
-        // 認証チェック (デバッグのため完全に無効化)
-        functions.logger.info("認証チェックを無効化してテスト実行中 - Version 2.0", {
-          hasAuth: !!context.auth,
-          authUid: context.auth?.uid,
-          dataReceived: Object.keys(data),
-          deployTime: "2025-01-13T04:20:00",
-        });
+        // 認証チェック
+        if (!context.auth) {
+          functions.logger.error("認証エラー: ユーザーが認証されていません");
+          throw new functions.https.HttpsError(
+              "unauthenticated",
+              "この機能を使用するにはログインが必要です"
+          );
+        }
 
         // 必須パラメータのチェック
         const {
@@ -43,47 +45,21 @@ export const sendWaterQualityEmail = functions.https.onCall(
           );
         }
 
-        // OAuth2クライアントでGmail APIを設定（正しい方法で実装）
-        functions.logger.info("OAuth2認証でGmail API設定開始", {
-          accessTokenLength: accessToken?.length,
-          accessTokenPrefix: accessToken?.substring(0, 20) + "...",
-        });
-
-        // OAuth2クライアントを作成し、アクセストークンを設定
-        const oauth2Client = new google.auth.OAuth2();
-        oauth2Client.setCredentials({
-          access_token: accessToken,
-        });
-
-        // Gmail APIクライアントを作成
-        const gmail = google.gmail({version: "v1", auth: oauth2Client});
-
-        // Gmail API認証テスト & 送信者メールアドレス取得
-        let senderEmail: string;
-        try {
-          functions.logger.info("Gmail API認証テスト開始 - プロフィール取得");
-          const profile = await gmail.users.getProfile({userId: "me"});
-          senderEmail = profile.data.emailAddress || "";
-          functions.logger.info("Gmail API認証成功", {
-            emailAddress: senderEmail,
-            profileMessagesTotal: profile.data.messagesTotal,
-          });
-
-          if (!senderEmail) {
-            throw new Error("送信者のメールアドレスを取得できませんでした");
-          }
-        } catch (profileError: any) {
-          functions.logger.error("Gmail APIプロフィール取得エラー", {
-            error: profileError.message,
-            code: profileError.code,
-            status: profileError.status,
-            details: profileError.details,
-          });
+        // 送信者のメールアドレスを取得（認証コンテキストから）
+        const senderEmail = context.auth.token.email;
+        
+        if (!senderEmail) {
           throw new functions.https.HttpsError(
               "unauthenticated",
-              `Gmail認証に失敗しました: ${profileError.message}`
+              "送信者のメールアドレスを取得できませんでした"
           );
         }
+
+        functions.logger.info("メール送信準備", {
+          senderEmail: senderEmail,
+          recipientEmail: recipientEmail,
+          accessTokenLength: accessToken?.length,
+        });
 
         // メール件名の設定（デバッグモード対応）
         const subject = debugMode ?
@@ -101,74 +77,122 @@ export const sendWaterQualityEmail = functions.https.onCall(
           body += "\n※ これはテスト送信です ※\n";
         }
 
-        // メール送信用のリクエストデータを作成（RFC2822形式）
-        const emailContent = [
-          `From: ${senderEmail}`,
-          `To: ${recipientEmail}`,
-          `Subject: ${subject}`,
-          `Content-Type: text/plain; charset=utf-8`,
-          "",
-          body,
-        ].join("\n");
-
-        // Base64エンコード
-        const encodedEmail = Buffer.from(emailContent)
-            .toString("base64")
-            .replace(/\+/g, "-")
-            .replace(/\//g, "_")
-            .replace(/=+$/, "");
-
-        // Gmail APIでメール送信
-        functions.logger.info("Gmail API メール送信開始", {
-          recipient: recipientEmail,
-          encodedEmailLength: encodedEmail.length,
-        });
-
-        const response = await gmail.users.messages.send({
-          userId: "me",
-          requestBody: {
-            raw: encodedEmail,
+        // Nodemailerのtransporterを作成（OAuth2認証）
+        functions.logger.info("Nodemailer transporter作成開始");
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            type: "OAuth2",
+            user: senderEmail,
+            accessToken: accessToken,
           },
         });
 
-        functions.logger.info("メール送信成功", {
-          messageId: response.data.id,
-          recipient: recipientEmail,
-          debugMode: debugMode,
-          userId: context.auth.uid,
+        functions.logger.info("メール送信開始", {
+          from: senderEmail,
+          to: recipientEmail,
+          subject: subject,
         });
+
+        // メール送信
+        let info;
+        try {
+          info = await transporter.sendMail({
+            from: senderEmail,
+            to: recipientEmail,
+            subject: subject,
+            text: body,
+          });
+
+          functions.logger.info("メール送信成功", {
+            messageId: info.messageId,
+            recipient: recipientEmail,
+            debugMode: debugMode,
+            userId: context.auth.uid,
+            response: info.response,
+          });
+        } catch (sendError: any) {
+          // メール送信エラーの詳細ログ
+          functions.logger.error("========================================");
+          functions.logger.error("❌ Nodemailer メール送信エラー");
+          functions.logger.error("エラーメッセージ:", sendError.message);
+          functions.logger.error("エラー名:", sendError.name);
+          functions.logger.error("エラーコード:", sendError.code);
+          functions.logger.error("エラースタック:", sendError.stack);
+          functions.logger.error("送信先:", recipientEmail);
+          functions.logger.error("送信元:", senderEmail);
+          functions.logger.error("========================================");
+          
+          throw new functions.https.HttpsError(
+              "internal",
+              `メール送信に失敗しました: ${sendError.message}`
+          );
+        }
 
         return {
           status: "success",
           message: "メールが正常に送信されました",
-          messageId: response.data.id,
+          messageId: info.messageId,
           timestamp: new Date().toISOString(),
         };
       } catch (error: any) {
-        functions.logger.error("メール送信エラー", {
-          error: error.message,
-          errorCode: error.code,
-          errorStatus: error.status,
-          errorStack: error.stack,
-          userId: context.auth?.uid,
-          data: data,
-        });
+        // エラー情報を詳細に出力
+        functions.logger.error("========================================");
+        functions.logger.error("❌ 最終エラーハンドラー: メール送信処理失敗");
+        functions.logger.error("エラーメッセージ:", error.message);
+        functions.logger.error("エラーコード:", error.code);
+        functions.logger.error("エラーステータス:", error.status);
+        functions.logger.error("エラー名:", error.name);
+        functions.logger.error("エラータイプ:", typeof error);
+        
+        if (error.response) {
+          functions.logger.error("レスポンスステータス:", error.response.status);
+          functions.logger.error("レスポンスステータステキスト:", 
+            error.response.statusText);
+          
+          if (error.response.data) {
+            try {
+              const dataStr = JSON.stringify(error.response.data, null, 2);
+              functions.logger.error("レスポンスデータ(全体):", dataStr);
+              
+              // エラーの詳細情報があれば個別に出力
+              if (error.response.data.error) {
+                functions.logger.error("エラー詳細:", 
+                  JSON.stringify(error.response.data.error, null, 2));
+              }
+            } catch (e) {
+              functions.logger.error("レスポンスデータ(stringify失敗):", 
+                error.response.data);
+            }
+          }
+          
+          if (error.response.headers) {
+            functions.logger.error("レスポンスヘッダー:", 
+              JSON.stringify(error.response.headers, null, 2));
+          }
+        }
+        
+        if (error.config) {
+          functions.logger.error("リクエスト設定:", {
+            url: error.config.url,
+            method: error.config.method,
+            baseURL: error.config.baseURL,
+          });
+        }
+        
+        functions.logger.error("スタックトレース:", error.stack);
+        functions.logger.error("========================================");
 
         // エラーの種類に応じて適切なエラーメッセージを返す
         if (error.code === 401 || error.status === 401) {
           throw new functions.https.HttpsError(
               "unauthenticated",
-              "認証が必要です"
+              "認証が必要です。Gmail APIの認証に失敗しました。"
           );
         } else if (error.code === 403 || error.status === 403) {
           throw new functions.https.HttpsError(
               "permission-denied",
-              "認証トークンが無効です。再ログインしてください。"
-          );
-        } else if (error.code === 403) {
-          throw new functions.https.HttpsError(
-              "permission-denied",
-              "Gmail送信権限がありません。認証時に権限を許可してください。"
+              "Gmail送信権限がありません。認証時にGmail送信権限を許可してください。"
           );
         } else if (error.message.includes("quota")) {
           throw new functions.https.HttpsError(

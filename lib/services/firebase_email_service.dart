@@ -51,10 +51,30 @@ Future<String> sendDailyEmailWithFirebase({
 
   try {
     // 2. Gmail APIアクセス用のクレデンシャルを取得
+    debugPrint('🔐 Gmail認証情報を取得中...');
     final credentials = await AuthService.getGmailCredentials();
+
     if (credentials == null) {
-      return 'Gmail送信権限がありません。認証し直してください。';
+      debugPrint('❌ Gmail認証情報がnull');
+      return 'Gmail送信権限がありません。設定画面から「Gmail権限を再取得」を試してください。';
     }
+
+    debugPrint('✅ Gmail認証情報を取得しました');
+    debugPrint('🔑 アクセストークン長: ${credentials.accessToken.data.length}');
+    debugPrint('⏰ トークン有効期限(UTC): ${credentials.accessToken.expiry}');
+    debugPrint('⏰ 現在時刻(UTC): ${DateTime.now().toUtc()}');
+
+    // トークンの有効期限チェック（UTCで比較）
+    if (credentials.accessToken.expiry.isBefore(DateTime.now().toUtc())) {
+      debugPrint('❌ アクセストークンが期限切れです');
+      debugPrint('  期限: ${credentials.accessToken.expiry}');
+      debugPrint('  現在: ${DateTime.now().toUtc()}');
+      return 'アクセストークンの有効期限が切れています。設定画面から「Gmail権限を再取得」を試してください。';
+    }
+
+    debugPrint(
+      '✅ トークンは有効です（残り: ${credentials.accessToken.expiry.difference(DateTime.now().toUtc()).inMinutes}分）',
+    );
 
     // 3. 送信データの準備
     final now = DateTime.now();
@@ -74,8 +94,13 @@ Future<String> sendDailyEmailWithFirebase({
     }
 
     // 4. Firebase Functions呼び出し
-    final functions = FirebaseFunctions.instance;
+    // リージョンを明示的に指定（us-central1）
+    final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
     final callable = functions.httpsCallable('sendWaterQualityEmail');
+
+    // Firebase認証状態の確認
+    debugPrint('🔐 Firebase Auth UID: ${AuthService.currentUser?.uid}');
+    debugPrint('📧 Firebase Auth Email: ${AuthService.userEmail}');
 
     // アクセストークンのログ出力（デバッグ用）
     debugPrint(
@@ -136,12 +161,19 @@ Future<String> sendDailyEmailWithFirebase({
     }
   } catch (e) {
     debugPrint('❌ Firebase Functions エラー詳細: $e');
+    debugPrint('❌ エラーの型: ${e.runtimeType}');
+
+    // Firebase Authの状態を確認
+    debugPrint('❌ Firebase Auth状態:');
+    debugPrint('  - isSignedIn: ${AuthService.isSignedIn}');
+    debugPrint('  - currentUser: ${AuthService.currentUser?.uid}');
+    debugPrint('  - email: ${AuthService.userEmail}');
 
     // エラーメッセージを分かりやすく
     String errorMessage = 'メール送信に失敗しました';
 
     if (e.toString().contains('unauthenticated')) {
-      errorMessage = '認証が失敗しました。再ログインしてください。';
+      errorMessage = '認証が失敗しました。設定画面から「Gmail権限を再取得」を試してください。';
     } else if (e.toString().contains('permission-denied')) {
       errorMessage = 'Gmail送信権限がありません。設定を確認してください。';
     } else if (e.toString().contains('invalid-argument')) {
