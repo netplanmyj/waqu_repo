@@ -1,0 +1,19 @@
+{"users": [
+{
+  "localId": "VZcJpUHeSDYZl11fFaPri2mOWum1",
+  "email": "kazuaki.ueda@gmail.com",
+  "emailVerified": true,
+  "displayName": "kazuaki ueda",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJrV5RxJ9-3i-bLxw8kBbOOCYnA9Z4atnqGUZWTsbnj4TDpO1vN=s96-c",
+  "lastSignedInAt": "1760324481699",
+  "createdAt": "1760324481699",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "106567266792807978666",
+      "email": "kazuaki.ueda@gmail.com",
+      "displayName": "kazuaki ueda",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJrV5RxJ9-3i-bLxw8kBbOOCYnA9Z4atnqGUZWTsbnj4TDpO1vN=s96-c"
+    }
+  ]
+}]}

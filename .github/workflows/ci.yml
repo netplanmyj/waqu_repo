@@ -21,12 +21,6 @@ jobs:
       with:
         channel: 'stable'
 
-    - name: Setup keys.dart for testing
-      run: |
-        echo "Setting up test configuration..."
-        cp lib/config/keys_test.dart lib/config/keys.dart
-        echo "Test keys.dart created with dummy endpoints"
-
     - name: Install dependencies
       run: flutter pub get
 

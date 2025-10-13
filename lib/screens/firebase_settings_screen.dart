@@ -3,16 +3,15 @@ import 'package:flutter/services.dart';
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class FirebaseSettingsScreen extends StatefulWidget {
+  const FirebaseSettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  State<FirebaseSettingsScreen> createState() => _FirebaseSettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _FirebaseSettingsScreenState extends State<FirebaseSettingsScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _gasUrlController;
   late TextEditingController _locationNumberController;
   late TextEditingController _recipientEmailController;
   late TextEditingController _testRecipientEmailController;
@@ -22,7 +21,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _gasUrlController = TextEditingController();
     _locationNumberController = TextEditingController();
     _recipientEmailController = TextEditingController();
     _testRecipientEmailController = TextEditingController();
@@ -31,70 +29,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
-    _gasUrlController.dispose();
     _locationNumberController.dispose();
     _recipientEmailController.dispose();
     _testRecipientEmailController.dispose();
     super.dispose();
-  }
-
-  // Gmail権限再取得の処理
-  Future<void> _handleGmailPermissionRequest() async {
-    // 確認ダイアログを表示
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Gmail権限を再取得'),
-        content: const Text(
-          '一度サインアウトして、再度Googleアカウントで'
-          'サインインします。よろしいですか？',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('再取得する'),
-          ),
-        ],
-      ),
-    );
-
-    if (!mounted || confirmed != true) return;
-
-    // ローディング表示
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (loadingContext) =>
-          const Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      // Gmail権限を再取得
-      final success = await AuthService.requestGmailPermission();
-
-      if (!mounted) return;
-      Navigator.of(context).pop(); // ローディングを閉じる
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? '✅ Gmail権限を再取得しました' : '❌ 権限の再取得に失敗しました'),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.of(context).pop(); // ローディングを閉じる
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ エラー: $e'), backgroundColor: Colors.red),
-      );
-    }
   }
 
   Future<void> _loadSettings() async {
@@ -104,7 +42,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final settings = await SettingsService.getSettings();
     setState(() {
-      _gasUrlController.text = settings.gasUrl;
       _locationNumberController.text = settings.locationNumber;
       _recipientEmailController.text = settings.recipientEmail;
       _testRecipientEmailController.text = settings.testRecipientEmail;
@@ -118,11 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    // URLの前後の空白・改行を削除
-    final cleanedGasUrl = _gasUrlController.text.trim().replaceAll('\n', '');
-
     final settings = AppSettings(
-      gasUrl: cleanedGasUrl,
       locationNumber: _locationNumberController.text.trim(),
       recipientEmail: _recipientEmailController.text.trim(),
       testRecipientEmail: _testRecipientEmailController.text.trim(),
@@ -162,19 +95,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return null;
   }
 
-  String? _validateGasUrl(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'GAS WebアプリURLを入力してください';
-    }
-    if (!value.startsWith('https://script.google.com/macros/s/')) {
-      return '正しいGAS WebアプリURLを入力してください';
-    }
-    if (!value.endsWith('/exec')) {
-      return 'URLの末尾が/execではありません';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -199,32 +119,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // GAS WebアプリURL
+            // 認証状態表示
             Card(
+              color: Colors.blue[50],
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Google Apps Script設定',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Row(
+                      children: [
+                        Icon(Icons.account_circle, color: Colors.blue[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Google認証状態',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: Colors.blue[600]),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _gasUrlController,
-                      decoration: const InputDecoration(
-                        labelText: 'GAS WebアプリURL',
-                        hintText: 'https://script.google.com/macros/s/.../exec',
-                        border: OutlineInputBorder(),
-                        helperText:
-                            'デプロイしたGAS WebアプリのURLを正確に入力してください\n例: https://script.google.com/macros/s/AKfycb.../exec',
-                        helperMaxLines: 3,
+                    Text(
+                      '✅ ${AuthService.userEmail ?? "不明"} でサインイン済み',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
                       ),
-                      keyboardType: TextInputType.url,
-                      validator: _validateGasUrl,
-                      maxLines: 3,
-                      minLines: 1,
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Gmail送信権限: 有効',
+                      style: TextStyle(color: Colors.green),
                     ),
                   ],
                 ),
@@ -280,6 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       decoration: const InputDecoration(
                         hintText: '例: report@example.com',
                         border: OutlineInputBorder(),
+                        helperText: '実際の報告先メールアドレスを入力してください',
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) => _validateEmail(value, '送信先メールアドレス'),
@@ -307,6 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       decoration: const InputDecoration(
                         hintText: '例: test@example.com',
                         border: OutlineInputBorder(),
+                        helperText: 'テスト送信時に使用するメールアドレスを入力してください',
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) =>
@@ -340,8 +267,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       subtitle: Text(
                         _isDebugMode
-                            ? 'メールはテスト用送信先に送信されます'
-                            : 'メールは通常の送信先に送信されます',
+                            ? 'メールはテスト用送信先に送信されます\n送信履歴の日次チェックも無効になります'
+                            : 'メールは通常の送信先に送信されます\n1日1回の送信制限が有効です',
                       ),
                       value: _isDebugMode,
                       onChanged: (value) {
@@ -357,9 +284,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Gmail権限再取得ボタン
+            // Firebase Functions説明
             Card(
-              color: Colors.orange[50],
+              color: Colors.green[50],
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -367,33 +294,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.mail_outline, color: Colors.orange[700]),
+                        Icon(Icons.cloud, color: Colors.green[600]),
                         const SizedBox(width: 8),
                         Text(
-                          'Gmail権限の再取得',
+                          'メール送信方式',
                           style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Colors.orange[700],
-                                fontWeight: FontWeight.bold,
-                              ),
+                              ?.copyWith(color: Colors.green[600]),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'メール送信時に「認証が必要です」エラーが出る場合は、'
-                      'このボタンでGmail権限を再取得してください。',
-                      style: TextStyle(fontSize: 13),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: _handleGmailPermissionRequest,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Gmail権限を再取得'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange[600],
-                        foregroundColor: Colors.white,
+                      '✅ Firebase Functions + Gmail API',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'あなたのGoogleアカウントから直接メールを送信します\n'
+                      'GASの設定や管理は不要です',
+                      style: TextStyle(fontSize: 12),
                     ),
                   ],
                 ),
