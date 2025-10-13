@@ -64,8 +64,5 @@ app.*.map.json
 /android/app/google-services.json
 /ios/Runner/GoogleService-Info.plist
 
-# Dart/Flutter固有設定
-lib/config/keys.dart
-
 # Python関連
 venv/
