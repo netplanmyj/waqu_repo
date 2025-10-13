@@ -77,6 +77,14 @@ Future<String> sendDailyEmailWithFirebase({
     final functions = FirebaseFunctions.instance;
     final callable = functions.httpsCallable('sendWaterQualityEmail');
 
+    // アクセストークンのログ出力（デバッグ用）
+    debugPrint(
+      '🔑 送信するアクセストークン: ${credentials.accessToken.data.substring(0, 50)}...',
+    );
+    debugPrint('⏰ トークン有効期限: ${credentials.accessToken.expiry}');
+    debugPrint('📧 送信先: $recipientEmail');
+    debugPrint('🔧 デバッグモード: ${settings.isDebugMode}');
+
     final result = await callable.call({
       'monthDay': monthDay,
       'time': time,

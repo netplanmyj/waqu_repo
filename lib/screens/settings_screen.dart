@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/settings_service.dart';
+import '../services/auth_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,6 +36,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _recipientEmailController.dispose();
     _testRecipientEmailController.dispose();
     super.dispose();
+  }
+
+  // Gmail権限再取得の処理
+  Future<void> _handleGmailPermissionRequest() async {
+    // 確認ダイアログを表示
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Gmail権限を再取得'),
+        content: const Text(
+          '一度サインアウトして、再度Googleアカウントで'
+          'サインインします。よろしいですか？',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('キャンセル'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('再取得する'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || confirmed != true) return;
+
+    // ローディング表示
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (loadingContext) =>
+          const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Gmail権限を再取得
+      final success = await AuthService.requestGmailPermission();
+
+      if (!mounted) return;
+      Navigator.of(context).pop(); // ローディングを閉じる
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? '✅ Gmail権限を再取得しました' : '❌ 権限の再取得に失敗しました'),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // ローディングを閉じる
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ エラー: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -290,6 +350,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         });
                       },
                       activeThumbColor: Colors.orange,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Gmail権限再取得ボタン
+            Card(
+              color: Colors.orange[50],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.mail_outline, color: Colors.orange[700]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Gmail権限の再取得',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Colors.orange[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'メール送信時に「認証が必要です」エラーが出る場合は、'
+                      'このボタンでGmail権限を再取得してください。',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: _handleGmailPermissionRequest,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Gmail権限を再取得'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange[600],
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ],
                 ),
