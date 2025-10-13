@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/email_service.dart'; // サービスファイルをインポート
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/account_dialog.dart';
 import 'history_screen.dart';
 import 'firebase_settings_screen.dart';
 
@@ -136,25 +137,43 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           // ユーザー情報表示（デバッグモード時はダミー情報）
           if (AuthService.userEmail != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // デバッグモード時はアイコンを表示
-                    if (_isDebugMode)
-                      const Padding(
-                        padding: EdgeInsets.only(right: 4.0),
-                        child: Icon(Icons.bug_report, size: 14),
+            GestureDetector(
+              onTap: _showAccountDialog,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // デバッグモード時はアイコンを表示
+                      if (_isDebugMode)
+                        const Padding(
+                          padding: EdgeInsets.only(right: 4.0),
+                          child: Icon(Icons.bug_report, size: 14),
+                        ),
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundImage: AuthService.userPhotoUrl != null
+                            ? NetworkImage(AuthService.userPhotoUrl!)
+                            : null,
+                        backgroundColor: Colors.blue[300],
+                        child: AuthService.userPhotoUrl == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
                       ),
-                    Text(
-                      _isDebugMode
-                          ? 'demo-user' // デバッグモード時のダミー名
-                          : AuthService.userEmail!.split('@')[0],
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        _isDebugMode
+                            ? 'demo-user' // デバッグモード時のダミー名
+                            : AuthService.userEmail!.split('@')[0],
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -186,73 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
             tooltip: '設定',
-          ),
-          // サインアウトボタン
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'signout') {
-                // contextを非同期処理前に保存
-                final messenger = ScaffoldMessenger.of(context);
-
-                try {
-                  await AuthService.signOut();
-                } catch (e) {
-                  if (mounted) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text('サインアウトに失敗しました: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              }
-            },
-            itemBuilder: (context) => [
-              // ユーザー情報表示（デバッグモード時はダミー）
-              if (AuthService.userEmail != null)
-                PopupMenuItem<String>(
-                  enabled: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.person, size: 16),
-                          const SizedBox(width: 8),
-                          Text(
-                            _isDebugMode
-                                ? 'Demo User'
-                                : AuthService.userName ?? 'ユーザー',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _isDebugMode
-                            ? 'demo@example.com'
-                            : AuthService.userEmail!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const Divider(),
-                    ],
-                  ),
-                ),
-              const PopupMenuItem<String>(
-                value: 'signout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('サインアウト'),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -351,6 +303,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // アカウント情報ダイアログを表示
+  void _showAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AccountDialog(isDebugMode: _isDebugMode),
     );
   }
 }
