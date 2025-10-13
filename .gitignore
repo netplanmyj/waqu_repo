@@ -44,6 +44,28 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Firebase / Node.js関連
+/functions/node_modules/
+/functions/lib/
+/functions/.eslintrc.js
+/functions/.eslintrc.json
+/functions/.env
+/functions/.env.local
+/functions/.env.development.local
+/functions/.env.test.local
+/functions/.env.production.local
+/functions/npm-debug.log*
+/functions/yarn-debug.log*
+/functions/yarn-error.log*
+.firebase/
+.firebaserc.local
+
+# Google Services設定ファイル（プロジェクト固有）
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+
+# Dart/Flutter固有設定
 lib/config/keys.dart
 
+# Python関連
 venv/

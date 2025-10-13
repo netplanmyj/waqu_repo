@@ -2,64 +2,63 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class AppSettings {
+  final String gasUrl;
   final String locationNumber;
   final String recipientEmail;
   final String testRecipientEmail;
   final bool isDebugMode;
-  // GAS URLは非推奨だが後方互換性のために残す
-  final String gasUrl;
 
   AppSettings({
+    required this.gasUrl,
     required this.locationNumber,
     required this.recipientEmail,
     required this.testRecipientEmail,
     required this.isDebugMode,
-    this.gasUrl = '',
   });
 
   factory AppSettings.defaultSettings() {
     return AppSettings(
+      gasUrl: '',
       locationNumber: '01',
       recipientEmail: '',
       testRecipientEmail: '',
       isDebugMode: false,
-      gasUrl: '',
     );
   }
 
   AppSettings copyWith({
+    String? gasUrl,
     String? locationNumber,
     String? recipientEmail,
     String? testRecipientEmail,
     bool? isDebugMode,
-    String? gasUrl,
   }) {
     return AppSettings(
+      gasUrl: gasUrl ?? this.gasUrl,
       locationNumber: locationNumber ?? this.locationNumber,
       recipientEmail: recipientEmail ?? this.recipientEmail,
       testRecipientEmail: testRecipientEmail ?? this.testRecipientEmail,
       isDebugMode: isDebugMode ?? this.isDebugMode,
-      gasUrl: gasUrl ?? this.gasUrl,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'gasUrl': gasUrl,
       'locationNumber': locationNumber,
       'recipientEmail': recipientEmail,
       'testRecipientEmail': testRecipientEmail,
       'isDebugMode': isDebugMode,
-      'gasUrl': gasUrl, // 後方互換性
     };
   }
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
+      gasUrl: json['gasUrl'] ?? '',
       locationNumber: json['locationNumber'] ?? '01',
       recipientEmail: json['recipientEmail'] ?? '',
       testRecipientEmail: json['testRecipientEmail'] ?? '',
       isDebugMode: json['isDebugMode'] ?? false,
-      gasUrl: json['gasUrl'] ?? '', // 後方互換性
     );
   }
 }
@@ -99,24 +98,9 @@ class SettingsService {
         : settings.recipientEmail;
   }
 
-  // 設定の妥当性チェック
-  static Future<List<String>> validateSettings() async {
-    final settings = await getSettings();
-    final errors = <String>[];
-
-    if (settings.recipientEmail.isEmpty) {
-      errors.add('送信先メールアドレスが設定されていません');
-    }
-
-    if (settings.testRecipientEmail.isEmpty) {
-      errors.add('テスト用送信先メールアドレスが設定されていません');
-    }
-
-    if (settings.locationNumber.isEmpty ||
-        !RegExp(r'^\d{2}$').hasMatch(settings.locationNumber)) {
-      errors.add('地点番号が正しく設定されていません（2桁の数字で入力してください）');
-    }
-
-    return errors;
+  // 設定をリセット
+  static Future<void> resetSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(settingsKey);
   }
 }

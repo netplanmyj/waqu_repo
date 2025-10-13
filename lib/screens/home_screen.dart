@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/email_service.dart'; // サービスファイルをインポート
 import '../services/settings_service.dart';
+import '../services/auth_service.dart';
 import 'history_screen.dart';
-import 'settings_screen.dart';
+import 'firebase_settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,10 +45,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // デバッグモードの場合は常に送信可能
     if (settings.isDebugMode) {
-      setState(() {
-        _isSentToday = false;
-        _message = 'デバッグモード: 何度でも送信可能です。';
-      });
+      if (mounted) {
+        setState(() {
+          _isSentToday = false;
+          _message = 'デバッグモード: 何度でも送信可能です。';
+        });
+      }
       return;
     }
 
@@ -61,18 +64,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (lastDateString != null) {
         final lastDate = DateTime.parse(lastDateString);
-        setState(() {
-          _message = '${lastDate.month}月${lastDate.day}日は送信済みです。';
-        });
+        if (mounted) {
+          setState(() {
+            _message = '${lastDate.month}月${lastDate.day}日は送信済みです。';
+          });
+        }
       } else {
-        setState(() {
-          _message = '本日の送信は完了済みです。';
-        });
+        if (mounted) {
+          setState(() {
+            _message = '本日の送信は完了済みです。';
+          });
+        }
       }
     } else {
-      setState(() {
-        _message = '送信ボタンを押してください。';
-      });
+      if (mounted) {
+        setState(() {
+          _message = '送信ボタンを押してください。';
+        });
+      }
     }
   }
 
@@ -87,9 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final chlorine = double.tryParse(_chlorineController.text);
 
     if (chlorine == null) {
-      setState(() {
-        _message = '残留塩素は数値で入力してください。';
-      });
+      if (mounted) {
+        setState(() {
+          _message = '残留塩素は数値で入力してください。';
+        });
+      }
       return;
     }
 
@@ -97,12 +108,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await sendDailyEmail(time: time, chlorine: chlorine);
 
     // 送信後に状態をチェック（デバッグモードも考慮）
-    _checkSentStatus();
+    if (mounted) {
+      _checkSentStatus();
 
-    setState(() {
-      // 送信結果をメッセージに設定
-      _message = result;
-    });
+      setState(() {
+        // 送信結果をメッセージに設定
+        _message = result;
+      });
+    }
   }
 
   @override
@@ -113,6 +126,17 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.blue[600],
         foregroundColor: Colors.white,
         actions: [
+          // ユーザー情報表示
+          if (AuthService.userEmail != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Center(
+                child: Text(
+                  AuthService.userEmail!.split('@')[0],
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
@@ -126,15 +150,55 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () async {
+              // Navigatorを非同期処理前に保存
+              final navigator = Navigator.of(context);
+
               // 設定画面から戻った時に状態を更新
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              await navigator.push(
+                MaterialPageRoute(
+                  builder: (context) => const FirebaseSettingsScreen(),
+                ),
               );
               // 設定が変更された可能性があるので状態をチェック
-              _checkSentStatus();
+              if (mounted) {
+                _checkSentStatus();
+              }
             },
             tooltip: '設定',
+          ),
+          // サインアウトボタン
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'signout') {
+                // contextを非同期処理前に保存
+                final messenger = ScaffoldMessenger.of(context);
+
+                try {
+                  await AuthService.signOut();
+                } catch (e) {
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text('サインアウトに失敗しました: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'signout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout),
+                    SizedBox(width: 8),
+                    Text('サインアウト'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
