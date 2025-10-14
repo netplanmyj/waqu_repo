@@ -35,25 +35,22 @@ waqu_repo/
 ├── lib/                    # Dartソースコード
 │   ├── main.dart          # アプリエントリポイント
 │   ├── screens/           # 画面UI
-│   │   ├── home_screen.dart       # メイン画面
-│   │   ├── settings_screen.dart   # 設定画面
-│   │   └── history_screen.dart         # 履歴画面
+│   │   ├── home_screen.dart               # メイン画面
+│   │   ├── firebase_settings_screen.dart  # 設定画面
+│   │   └── history_screen.dart            # 履歴画面
 │   ├── services/                       # ビジネスロジック
 │   │   ├── firebase_email_service.dart # Firebase Functions メール送信
 │   │   ├── auth_service.dart           # Google認証サービス
 │   │   ├── settings_service.dart       # 設定管理サービス
 │   │   └── history_service.dart        # 履歴管理サービス
 │   └── widgets/                        # 共通ウィジェット
-│       └── auth_wrapper.dart           # 認証状態管理
+│       ├── auth_wrapper.dart           # 認証状態管理
+│       └── account_dialog.dart         # アカウント情報ダイアログ
 ├── functions/                          # Firebase Functions
 │   ├── src/
 │   │   └── index.ts                    # メール送信Function
 │   ├── package.json                    # Node.js依存関係
 │   └── tsconfig.json                   # TypeScript設定
-├── gas/                                # Google Apps Script（旧版）
-│   ├── Code.gs                         # メイン処理ファイル
-│   ├── appsscript.json                 # プロジェクト設定
-│   └── README.md                       # GAS設定説明
 ├── test/                 # テストファイル
 ├── DEPLOY.md            # デプロイメント手順書
 └── README.md           # このファイル

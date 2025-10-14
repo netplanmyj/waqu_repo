@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/email_service.dart'; // サービスファイルをインポート
+import '../services/firebase_email_service.dart'; // Firebase版メールサービス
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/account_dialog.dart';
