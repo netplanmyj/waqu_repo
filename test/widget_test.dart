@@ -8,12 +8,14 @@ void main() {
   group('水質報告アプリ基本テスト', () {
     testWidgets('簡単なウィジェットが作成できる', (WidgetTester tester) async {
       // 最小限のテストウィジェット
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(title: Text('テスト')),
-          body: Text('テストが動作しています'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(title: Text('テスト')),
+            body: Text('テストが動作しています'),
+          ),
         ),
-      ));
+      );
 
       // AppBarが表示されることを確認
       expect(find.byType(AppBar), findsOneWidget);

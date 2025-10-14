@@ -326,7 +326,7 @@ class _FirebaseSettingsScreenState extends State<FirebaseSettingsScreen> {
                     const SizedBox(height: 4),
                     const Text(
                       'あなたのGoogleアカウントから直接メールを送信します\n'
-                      'GASの設定や管理は不要です',
+                      '追加の設定や外部スクリプトは不要です',
                       style: TextStyle(fontSize: 12),
                     ),
                   ],
