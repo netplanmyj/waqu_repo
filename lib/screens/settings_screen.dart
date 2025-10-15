@@ -3,14 +3,14 @@ import 'package:flutter/services.dart';
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
 
-class FirebaseSettingsScreen extends StatefulWidget {
-  const FirebaseSettingsScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  State<FirebaseSettingsScreen> createState() => _FirebaseSettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _FirebaseSettingsScreenState extends State<FirebaseSettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _locationNumberController;
   late TextEditingController _recipientEmailController;

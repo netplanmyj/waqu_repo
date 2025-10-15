@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/firebase_email_service.dart'; // Firebase版メールサービス
+import '../services/gmail_service.dart';
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/account_dialog.dart';
 import 'history_screen.dart';
-import 'firebase_settings_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -195,9 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // 設定画面から戻った時に状態を更新
               await navigator.push(
-                MaterialPageRoute(
-                  builder: (context) => const FirebaseSettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
               // 設定が変更された可能性があるので状態をチェック
               if (mounted) {

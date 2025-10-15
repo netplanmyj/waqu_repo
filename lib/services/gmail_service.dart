@@ -23,7 +23,7 @@ Future<bool> isSentToday() async {
       lastDate.day == now.day;
 }
 
-Future<String> sendDailyEmailWithFirebase({
+Future<String> sendDailyEmail({
   required String time,
   required double chlorine,
 }) async {
@@ -188,12 +188,4 @@ Future<String> sendDailyEmailWithFirebase({
 
     return fullErrorMessage;
   }
-}
-
-// email_service.dartから呼び出すための関数
-Future<String> sendDailyEmail({
-  required String time,
-  required double chlorine,
-}) async {
-  return await sendDailyEmailWithFirebase(time: time, chlorine: chlorine);
 }
