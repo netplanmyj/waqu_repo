@@ -171,6 +171,12 @@ flutter test test/settings_test.dart
 - **GAS設定**: [gas/README.md](./gas/README.md) を参照
 - **技術的な問題**: Issues セクションで報告
 
+## 📄 法的文書
+
+- **プライバシーポリシー**: [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) | [Web版](https://netplanmyj.github.io/waqu_repo/privacy-policy.html)
+- **OAuth認証審査**: [OAUTH_VERIFICATION.md](./OAUTH_VERIFICATION.md)
+- **Play Store公開**: [PLAYSTORE.md](./PLAYSTORE.md)
+
 ---
 
 **💧 水質管理業務の効率化にお役立てください！**

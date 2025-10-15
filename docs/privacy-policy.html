@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プライバシーポリシー - 水質報告アプリ</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2196F3;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1976D2;
+            margin-top: 30px;
+            padding-left: 10px;
+            border-left: 4px solid #2196F3;
+        }
+        h3 {
+            color: #1565C0;
+            margin-top: 20px;
+        }
+        .updated {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #2196F3;
+            color: white;
+        }
+        .highlight {
+            background-color: #E3F2FD;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .important {
+            background-color: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Courier New", monospace;
+        }
+        a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .contact-info {
+            background-color: #F5F5F5;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        ul {
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>プライバシーポリシー</h1>
+        <p class="updated"><strong>最終更新日: 2025年10月15日</strong></p>
+
+        <p>水質報告アプリ（以下「本アプリ」）は、ユーザーの皆様のプライバシーを尊重し、個人情報の保護に努めています。本プライバシーポリシーは、本アプリがどのような情報を収集し、どのように使用・保護するかを説明するものです。</p>
+
+        <h2>1. 収集する情報</h2>
+        
+        <h3>1.1 ユーザーが提供する情報</h3>
+        <p>本アプリは、以下の情報を収集します：</p>
+        
+        <h4>Googleアカウント情報</h4>
+        <ul>
+            <li><strong>メールアドレス</strong>: Google Sign-Inで取得</li>
+            <li><strong>アカウント名</strong>: Google Sign-Inで取得</li>
+            <li><strong>プロフィール情報</strong>: Googleアカウントに登録されている基本情報</li>
+        </ul>
+
+        <h4>アプリ設定情報</h4>
+        <ul>
+            <li><strong>送信先メールアドレス</strong>: ユーザーが設定画面で入力</li>
+            <li><strong>地点番号</strong>: 測定地点の識別番号（例: 01）</li>
+            <li><strong>デバッグモード設定</strong>: テスト送信の有効/無効</li>
+        </ul>
+
+        <h4>測定データ</h4>
+        <ul>
+            <li><strong>測定日</strong>: 水質検査を実施した日付</li>
+            <li><strong>測定時刻</strong>: 水質検査を実施した時刻</li>
+            <li><strong>残留塩素濃度</strong>: 測定された塩素濃度の値（mg/L）</li>
+        </ul>
+
+        <h2>2. 情報の使用目的</h2>
+        
+        <h3>2.1 Gmail API経由のメール送信</h3>
+        <ul>
+            <li><strong>目的</strong>: 測定データを指定されたメールアドレスに送信</li>
+            <li><strong>使用スコープ</strong>: <code>https://www.googleapis.com/auth/gmail.send</code></li>
+            <li><strong>送信元</strong>: ユーザー自身のGmailアカウント</li>
+            <li><strong>送信先</strong>: ユーザーが設定したメールアドレス</li>
+        </ul>
+
+        <div class="important">
+            <strong>重要</strong>: 本アプリは、ユーザーのGmailアカウントを使用してメールを送信します。これは、ユーザー自身が送信者となることを意味します。第三者のサーバーやアカウントからメールが送信されることはありません。
+        </div>
+
+        <h2>3. 情報の保存場所と期間</h2>
+        
+        <h3>3.1 ローカルストレージ（端末内）</h3>
+        <p>以下の情報は、<strong>ユーザーの端末内のみ</strong>に保存されます：</p>
+        
+        <table>
+            <tr>
+                <th>データ種類</th>
+                <th>保存場所</th>
+                <th>保存期間</th>
+            </tr>
+            <tr>
+                <td>アプリ設定</td>
+                <td>SharedPreferences</td>
+                <td>ユーザーが削除するまで</td>
+            </tr>
+            <tr>
+                <td>送信履歴</td>
+                <td>SharedPreferences</td>
+                <td>ユーザーが削除するまで</td>
+            </tr>
+            <tr>
+                <td>Gmailアクセストークン</td>
+                <td>メモリ内</td>
+                <td>セッション終了まで</td>
+            </tr>
+        </table>
+
+        <h3>3.2 Firebase Functions（一時処理）</h3>
+        <div class="highlight">
+            <p><strong>重要</strong>: Firebase Functionsはデータを永続的に保存しません。処理のためだけに一時的にデータを扱います。</p>
+            <p>データフロー：</p>
+            <ol>
+                <li>アプリからFunctionsにリクエスト送信</li>
+                <li>Functionsが一時的にデータを受け取る</li>
+                <li>Gmail API経由でメール送信</li>
+                <li>処理完了後、データは破棄</li>
+            </ol>
+        </div>
+
+        <h2>4. 情報の第三者提供</h2>
+        
+        <p>本アプリは、以下の場合を除き、ユーザーの個人情報を第三者に提供しません：</p>
+        <ul>
+            <li>ユーザーの明示的な同意がある場合</li>
+            <li>法令に基づく開示が必要な場合</li>
+            <li>人の生命、身体または財産の保護のために必要な場合</li>
+        </ul>
+
+        <h3>4.1 使用する外部サービス</h3>
+        
+        <h4>Google Gmail API</h4>
+        <ul>
+            <li><strong>提供元</strong>: Google LLC</li>
+            <li><strong>目的</strong>: メール送信機能の提供</li>
+            <li><strong>スコープ</strong>: <code>gmail.send</code>（メール送信のみ）</li>
+            <li><strong>プライバシーポリシー</strong>: <a href="https://policies.google.com/privacy" target="_blank">Googleプライバシーポリシー</a></li>
+        </ul>
+
+        <h4>Firebase (Google Cloud)</h4>
+        <ul>
+            <li><strong>提供元</strong>: Google LLC</li>
+            <li><strong>目的</strong>: Firebase Functions（メール送信処理）、Firebase Auth（認証）</li>
+            <li><strong>プライバシーとセキュリティ</strong>: <a href="https://firebase.google.com/support/privacy" target="_blank">Firebase プライバシーとセキュリティ</a></li>
+        </ul>
+
+        <h2>5. Gmail APIスコープの使用について</h2>
+        
+        <h3>5.1 使用スコープ</h3>
+        <p>本アプリは、以下のGmail APIスコープを使用します：</p>
+        <div class="highlight">
+            <p><code>https://www.googleapis.com/auth/gmail.send</code></p>
+            <p><strong>用途</strong>: 水質測定データをメールで送信するため</p>
+        </div>
+
+        <p><strong>使用しないスコープ</strong>:</p>
+        <ul>
+            <li>メールの読み取り（read）</li>
+            <li>メールの削除（delete）</li>
+            <li>メールの変更（modify）</li>
+            <li>ラベルの操作</li>
+        </ul>
+
+        <h3>5.2 権限の取り消し</h3>
+        <p>ユーザーはいつでも権限を取り消すことができます：</p>
+        <ol>
+            <li><a href="https://myaccount.google.com/permissions" target="_blank">Googleアカウントのセキュリティページ</a>にアクセス</li>
+            <li>「水質報告アプリ」を選択</li>
+            <li>「アクセス権を削除」をクリック</li>
+        </ol>
+
+        <h2>6. データのセキュリティ</h2>
+        
+        <h3>技術的保護措置</h3>
+        <ul>
+            <li><strong>通信の暗号化</strong>: すべてのAPI通信はHTTPS（TLS 1.2以上）で暗号化</li>
+            <li><strong>認証情報の保護</strong>: OAuth 2.0による安全な認証</li>
+            <li><strong>ローカルデータの保護</strong>: Android標準の暗号化機能を使用</li>
+        </ul>
+
+        <h2>7. ユーザーの権利</h2>
+        
+        <h3>データの訂正・削除権</h3>
+        <p>ユーザーは、以下の方法でデータを管理できます：</p>
+        <ul>
+            <li><strong>設定の変更</strong>: 設定画面から送信先メールアドレスを変更</li>
+            <li><strong>履歴の削除</strong>: 履歴画面で個別の履歴を長押し → 削除</li>
+            <li><strong>アカウント連携の解除</strong>: アプリ内でサインアウト</li>
+        </ul>
+
+        <h2>8. 子どものプライバシー</h2>
+        <p>本アプリは、13歳未満の子どもを対象としていません。13歳未満の子どもから意図的に個人情報を収集することはありません。</p>
+
+        <h2>9. プライバシーポリシーの変更</h2>
+        <p>本プライバシーポリシーは、法令の変更やサービス内容の更新に伴い、変更される場合があります。</p>
+        
+        <table>
+            <tr>
+                <th>日付</th>
+                <th>変更内容</th>
+            </tr>
+            <tr>
+                <td>2025年10月15日</td>
+                <td>初版作成</td>
+            </tr>
+        </table>
+
+        <h2>10. お問い合わせ</h2>
+        <div class="contact-info">
+            <p>本プライバシーポリシーに関するご質問、データの取り扱いに関するご要望は、以下までお問い合わせください。</p>
+            <p><strong>開発者</strong>: [あなたの名前]<br>
+            <strong>メールアドレス</strong>: <a href="mailto:your-email@example.com">your-email@example.com</a><br>
+            <strong>対応時間</strong>: 平日 9:00-17:00（日本時間）<br>
+            <strong>回答期間</strong>: 通常3営業日以内</p>
+        </div>
+
+        <h2>11. 同意</h2>
+        <p>本アプリを使用することにより、ユーザーは本プライバシーポリシーに同意したものとみなされます。</p>
+
+        <hr style="margin: 40px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="text-align: center; color: #666; font-size: 0.9em;">
+            最終確認日: 2025年10月15日<br>
+            このプライバシーポリシーは、OAuth同意画面の審査要件を満たすよう作成されています。
+        </p>
+    </div>
+</body>
+</html>
