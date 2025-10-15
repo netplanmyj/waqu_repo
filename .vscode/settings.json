@@ -1,0 +1,9 @@
+{
+  "eslint.workingDirectories": [
+    {
+      "directory": "./functions",
+      "changeProcessCWD": true
+    }
+  ],
+  "eslint.nodePath": "./functions/node_modules"
+}

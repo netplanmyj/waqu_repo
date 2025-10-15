@@ -1,25 +1,18 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {google} from "googleapis";
+import {CallableRequest} from "firebase-functions/v2/https";
 
 // Firebase Admin SDKの初期化
 admin.initializeApp();
 
 // Gmail APIを使ったメール送信のCallable Function
 export const sendWaterQualityEmail = functions.https.onCall(
-    async (request: any) => {
+    async (request: CallableRequest) => {
       try {
         // Firebase Functions v2では、requestオブジェクトを使用
         const data = request.data;
         const auth = request.auth;
-        
-        // 認証情報をログ出力
-        functions.logger.info("🔍 認証情報確認", {
-          hasAuth: !!auth,
-          authUid: auth?.uid,
-          authEmail: auth?.token?.email,
-          timestamp: new Date().toISOString(),
-        });
 
         // 認証チェック
         if (!auth) {
@@ -51,7 +44,7 @@ export const sendWaterQualityEmail = functions.https.onCall(
 
         // 送信者のメールアドレスを取得（認証コンテキストから）
         const senderEmail = auth.token.email;
-        
+
         if (!senderEmail) {
           throw new functions.https.HttpsError(
               "unauthenticated",
@@ -59,24 +52,14 @@ export const sendWaterQualityEmail = functions.https.onCall(
           );
         }
 
-        functions.logger.info("Gmail API 準備開始", {
-          senderEmail: senderEmail,
-          recipientEmail: recipientEmail,
-          accessTokenLength: accessToken?.length,
-        });
-
         // OAuth2Clientの作成と設定
         const oauth2Client = new google.auth.OAuth2();
         oauth2Client.setCredentials({
           access_token: accessToken,
         });
 
-        functions.logger.info("OAuth2Client作成完了");
-
         // Gmail APIクライアントの作成
         const gmail = google.gmail({version: "v1", auth: oauth2Client});
-
-        functions.logger.info("Gmail APIクライアント作成完了");
 
         // メール件名の設定（デバッグモード対応）
         const subject = debugMode ?
@@ -84,7 +67,8 @@ export const sendWaterQualityEmail = functions.https.onCall(
         `毎日検査報告（地点${locationNumber || "01"})`;
 
         // 件名をMIME-encoded-word形式でエンコード（日本語対応）
-        const encodedSubject = `=?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`;
+        const base64Subject = Buffer.from(subject).toString("base64");
+        const encodedSubject = `=?UTF-8?B?${base64Subject}?=`;
 
         // メール本文の作成
         let body = `地点: ${locationNumber || "01"}\n` +
@@ -102,8 +86,8 @@ export const sendWaterQualityEmail = functions.https.onCall(
           `From: ${senderEmail}`,
           `To: ${recipientEmail}`,
           `Subject: ${encodedSubject}`,
-          `Content-Type: text/plain; charset=utf-8`,
-          ``,
+          "Content-Type: text/plain; charset=utf-8",
+          "",
           body,
         ].join("\r\n");
 
@@ -114,13 +98,6 @@ export const sendWaterQualityEmail = functions.https.onCall(
             .replace(/\//g, "_")
             .replace(/=+$/, "");
 
-        functions.logger.info("メール送信開始", {
-          from: senderEmail,
-          to: recipientEmail,
-          subject: subject,
-          encodedEmailLength: encodedEmail.length,
-        });
-
         // Gmail APIでメール送信
         const response = await gmail.users.messages.send({
           userId: "me",
@@ -129,13 +106,9 @@ export const sendWaterQualityEmail = functions.https.onCall(
           },
         });
 
-        functions.logger.info("✅ Gmail API メール送信成功", {
+        functions.logger.info("✅ メール送信成功", {
           messageId: response.data.id,
           recipient: recipientEmail,
-          debugMode: debugMode,
-          userId: auth.uid,
-          labelIds: response.data.labelIds,
-          threadId: response.data.threadId,
         });
 
         return {
@@ -144,67 +117,19 @@ export const sendWaterQualityEmail = functions.https.onCall(
           messageId: response.data.id,
           timestamp: new Date().toISOString(),
         };
-      } catch (error: any) {
-        // エラー情報を詳細に出力
-        functions.logger.error("========================================");
-        functions.logger.error("❌ Gmail API メール送信エラー");
-        functions.logger.error("エラーメッセージ:", error.message);
-        functions.logger.error("エラーコード:", error.code);
-        functions.logger.error("エラー名:", error.name);
-        functions.logger.error("エラータイプ:", typeof error);
-        
-        // GaxiosError (Google APIs エラー) の詳細情報
-        if (error.response) {
-          functions.logger.error("--- レスポンス情報 ---");
-          functions.logger.error("ステータス:", error.response.status);
-          functions.logger.error("ステータステキスト:", 
-            error.response.statusText);
-          
-          if (error.response.data) {
-            try {
-              const dataStr = JSON.stringify(error.response.data, null, 2);
-              functions.logger.error("レスポンスデータ:", dataStr);
-              
-              // Gmail APIのエラー詳細
-              if (error.response.data.error) {
-                functions.logger.error("Gmail API エラー詳細:", {
-                  code: error.response.data.error.code,
-                  message: error.response.data.error.message,
-                  status: error.response.data.error.status,
-                  details: error.response.data.error.details,
-                });
-              }
-            } catch (e) {
-              functions.logger.error("レスポンスデータ(stringify失敗):", 
-                error.response.data);
-            }
-          }
-          
-          if (error.response.headers) {
-            functions.logger.error("レスポンスヘッダー:", 
-              JSON.stringify(error.response.headers, null, 2));
-          }
-        }
-        
-        if (error.config) {
-          functions.logger.error("--- リクエスト情報 ---");
-          functions.logger.error("URL:", error.config.url);
-          functions.logger.error("メソッド:", error.config.method);
-          functions.logger.error("ベースURL:", error.config.baseURL);
-          
-          // 認証ヘッダーの存在確認（値は出力しない）
-          if (error.config.headers) {
-            functions.logger.error("Authorizationヘッダー存在:", 
-              !!error.config.headers.Authorization);
-          }
-        }
-        
-        functions.logger.error("スタックトレース:", error.stack);
-        functions.logger.error("========================================");
+      } catch (error: unknown) {
+        // エラー情報をログ出力
+        functions.logger.error("❌ メール送信エラー", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+
+        // GaxiosErrorなど、APIエラーの詳細情報を取得
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any;
 
         // エラーの種類に応じて適切なエラーメッセージを返す
-        const statusCode = error.response?.status || error.code;
-        
+        const statusCode = err.response?.status || err.code;
+
         if (statusCode === 401) {
           throw new functions.https.HttpsError(
               "unauthenticated",
@@ -222,15 +147,16 @@ export const sendWaterQualityEmail = functions.https.onCall(
               "resource-exhausted",
               "送信制限に達しました。しばらく時間をおいてから再試行してください。"
           );
-        } else if (error.message.includes("quota")) {
+        } else if (err.message && err.message.includes("quota")) {
           throw new functions.https.HttpsError(
               "resource-exhausted",
               "Gmail API クォータ超過: 送信制限に達しました。"
           );
         } else {
+          const errorMessage = err.message || "不明なエラー";
           throw new functions.https.HttpsError(
               "internal",
-              `Gmail API メール送信失敗: ${error.message}`
+              `Gmail API メール送信失敗: ${errorMessage}`
           );
         }
       }
@@ -238,7 +164,7 @@ export const sendWaterQualityEmail = functions.https.onCall(
 );
 
 // ヘルスチェック用のHTTP Function
-export const healthCheck = functions.https.onRequest((req: any, res: any) => {
+export const healthCheck = functions.https.onRequest((req, res) => {
   res.json({
     status: "ok",
     timestamp: new Date().toISOString(),
