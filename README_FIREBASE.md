@@ -138,23 +138,22 @@ FirebaseFunctionsException: internal
 
 ```
 lib/
-├── main.dart                          # アプリエントリーポイント（Firebase初期化）
+├── main.dart                       # アプリエントリーポイント（Firebase初期化）
 ├── services/
-│   ├── auth_service.dart              # Google認証サービス
-│   ├── firebase_email_service.dart    # Firebase Functions メール送信
-│   ├── email_service.dart             # メール送信インターフェース
-│   └── settings_service.dart          # 設定管理（Firebase版）
+│   ├── auth_service.dart           # Google認証サービス
+│   ├── gmail_service.dart          # Gmail送信サービス
+│   └── settings_service.dart       # 設定管理
 ├── screens/
-│   ├── home_screen.dart               # ホーム画面（認証状態対応）
-│   └── firebase_settings_screen.dart  # 設定画面（Firebase版）
+│   ├── home_screen.dart            # ホーム画面（認証状態対応）
+│   └── settings_screen.dart        # 設定画面
 └── widgets/
-    └── auth_wrapper.dart              # 認証状態管理ラッパー
+    └── auth_wrapper.dart           # 認証状態管理ラッパー
 
 functions/
 ├── src/
-│   └── index.ts                       # Firebase Functions実装
-├── package.json                       # Node.js依存関係
-└── tsconfig.json                      # TypeScript設定
+│   └── index.ts                    # Firebase Functions実装
+├── package.json                    # Node.js依存関係
+└── tsconfig.json                   # TypeScript設定
 ```
 
 ## 🚀 今後の計画
