@@ -2,7 +2,35 @@
 
 現在の進捗状況と次のステップを管理するためのチェックリストです。
 
-**最終更新**: 2025年10月16日
+**最終更新**: 2025年10月17日
+
+---
+
+## 📢 審査フィードバック対応中
+
+### 受領したフィードバック（2025年10月16日）
+
+#### 1. ❌ 最小スコープのリクエスト要件
+```
+提供された理由では、リクエストした OAuth スコープが必要な理由が
+十分に説明されていません。
+```
+**対応状況**: ✅ 改善版テキスト作成完了（`OAUTH_SCOPE_JUSTIFICATION.md`）
+
+#### 2. ❌ ホームページの要件
+```
+ホームページでアプリの目的が説明されていません。
+```
+**対応状況**: ✅ ホームページ更新完了（`docs/index.md`）
+
+#### 3. ⚠️ アプリ名称の不統一
+- waqu-repo-2025（Firebaseプロジェクト名）
+- 水質報告アプリ（旧ドキュメント）
+- waqu repo（スペース付き）
+
+**対応状況**: ✅ 正式名称に統一完了
+- **正式名称**: 水質検査報告アプリ `waqu_repo`
+- **英語表記**: Water Quality Reporter
 
 ---
 
@@ -23,19 +51,26 @@
 ### Phase 2: ドキュメント整備
 - [x] PRIVACY_POLICY.md 作成
 - [x] OAUTH_VERIFICATION.md 作成
-- [x] プライバシーポリシー公開
+- [x] プライバシーポリシー公開・更新
   - **URL**: https://netplan.co.jp/library/waqu_repo/privacy/
   - **公開日**: 2025年10月16日
-- [x] アプリホームページ公開
+  - **更新日**: 2025年10月17日（アプリ名統一）
+- [x] アプリホームページ公開・更新
   - **URL**: https://netplan.co.jp/library/waqu_repo/
   - **公開日**: 2025年10月16日
+  - **更新日**: 2025年10月17日（アプリ目的・Gmail API使用理由を追加）
 - [x] 独自ドメイン使用（推奨事項クリア）
+- [x] アプリ名統一
+  - **正式名称**: 水質検査報告アプリ `waqu_repo`
+  - **英語表記**: Water Quality Reporter
 
 ### Phase 3: 審査準備
 - [x] プライバシーポリシー要件確認
 - [x] OAuth同意画面設定
 - [x] Gmail APIスコープ設定（`gmail.send`）
 - [x] アプリ情報整理
+- [x] スコープ使用理由の改善版作成（`OAUTH_SCOPE_JUSTIFICATION.md`）
+- [x] ホームページ要件対応（`OAUTH_HOMEPAGE_REQUIREMENTS.md`）
 
 ---
 
@@ -131,7 +166,88 @@
 
 ---
 
-## � OAuth審査の再申請（スコープ理由の改善）
+## 🔄 OAuth審査の再申請準備
+
+**審査フィードバック対応**: 2025年10月16-17日
+
+### 📋 再申請前チェックリスト
+
+#### 1. ホームページの更新とデプロイ
+
+- [x] `docs/index.md` の更新
+  - アプリ名を「水質検査報告アプリ waqu_repo」に統一
+  - 「アプリの目的」セクション追加
+  - 「なぜGmail APIを使用するのか」セクション追加
+  - 「使用する権限とその理由」セクション追加
+  - データフロー図追加
+  - 技術仕様追加
+
+- [ ] Astroサイトへデプロイ
+  - 更新版を本番環境にデプロイ
+  - URL: https://netplan.co.jp/library/waqu_repo/
+
+- [ ] デプロイ後の確認
+  - [ ] アプリ名が統一されている
+  - [ ] アプリの目的が明確に説明されている
+  - [ ] Gmail APIの使用理由が説明されている
+  - [ ] データフロー図が表示される
+
+#### 2. Google Cloud Console の更新
+
+詳細: `OAUTH_HOMEPAGE_REQUIREMENTS.md` 参照
+
+- [ ] **アプリ名の統一**
+  - Google Cloud Console → waqu-repo-2025 → OAuth同意画面
+  - アプリ名: 水質検査報告アプリ waqu_repo
+    または Water Quality Reporter
+
+- [ ] **アプリの説明を更新**（英語推奨）
+  ```
+  Water Quality Reporter (waqu_repo) is a business application 
+  for water facility workers in Japan to report daily residual 
+  chlorine measurement results to facility managers via email, 
+  as required by Japan's Water Supply Act.
+  
+  The app uses Gmail API (gmail.send scope only) to send 
+  formatted measurement reports from workers' own Gmail accounts 
+  to designated recipients, ensuring accountability and 
+  regulatory compliance.
+  ```
+
+- [ ] **スコープ使用理由の更新**
+  - `OAUTH_SCOPE_JUSTIFICATION.md` の改善版テキストを使用
+  - gmail.send スコープの「理由」フィールドに貼り付け
+
+- [ ] **ホームページURLの確認**
+  - URL: https://netplan.co.jp/library/waqu_repo/
+  - アクセス可能であることを確認
+
+- [ ] **プライバシーポリシーURLの確認**
+  - URL: https://netplan.co.jp/library/waqu_repo/privacy/
+  - アクセス可能であることを確認
+
+#### 3. デモ動画の準備（最優先）
+
+- [ ] テストユーザー追加
+- [ ] デモ動画撮影
+- [ ] YouTube公開（限定公開）
+- [ ] URL取得
+
+#### 4. 再申請
+
+- [ ] すべての変更を保存
+- [ ] 「確認のため送信」または「再申請」ボタンをクリック
+- [ ] 追加フォームに記入
+  - YouTube動画URL
+  - アプリの説明（上記の英語説明文）
+  - スコープ使用理由（改善版テキスト）
+- [ ] 送信
+- [ ] 申請完了メールを受信
+- [ ] 再申請日を記録: _______________
+
+---
+
+## 🔄 OAuth審査の再申請（スコープ理由の改善）- 参考
 
 **審査フィードバック日**: 2025年10月16日  
 **問題**: リクエストした OAuth スコープが必要な理由が十分に説明されていません
