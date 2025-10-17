@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSentToday = false;
   String _message = 'メッセージを送信できます。';
   bool _isDebugMode = false; // デバッグモードの状態を保持
+  bool _isSending = false; // 送信中フラグ（二重送信防止）
 
   // ② 入力フォーム用のコントローラー
   final TextEditingController _timeController = TextEditingController();
@@ -95,35 +96,58 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleSend() async {
+    // 二重送信防止
+    if (_isSending) {
+      return;
+    }
+
     // 入力値の検証
     if (_formKey.currentState?.validate() != true) {
       return;
     }
 
-    // 入力データを取得
-    final time = _timeController.text;
-    final chlorine = double.tryParse(_chlorineController.text);
+    // 送信中フラグをON
+    setState(() {
+      _isSending = true;
+      _message = '送信中...';
+    });
 
-    if (chlorine == null) {
+    try {
+      // 入力データを取得
+      final time = _timeController.text;
+      final chlorine = double.tryParse(_chlorineController.text);
+
+      if (chlorine == null) {
+        if (mounted) {
+          setState(() {
+            _message = '残留塩素は数値で入力してください。';
+            _isSending = false;
+          });
+        }
+        return;
+      }
+
+      // 送信処理の実行
+      final result = await sendDailyEmail(time: time, chlorine: chlorine);
+
+      // 送信後に状態をチェック（デバッグモードも考慮）
       if (mounted) {
+        _checkSentStatus();
+
         setState(() {
-          _message = '残留塩素は数値で入力してください。';
+          // 送信結果をメッセージに設定
+          _message = result;
+          _isSending = false;
         });
       }
-      return;
-    }
-
-    // 送信処理の実行
-    final result = await sendDailyEmail(time: time, chlorine: chlorine);
-
-    // 送信後に状態をチェック（デバッグモードも考慮）
-    if (mounted) {
-      _checkSentStatus();
-
-      setState(() {
-        // 送信結果をメッセージに設定
-        _message = result;
-      });
+    } catch (e) {
+      // エラーが発生した場合
+      if (mounted) {
+        setState(() {
+          _message = 'エラーが発生しました: $e';
+          _isSending = false;
+        });
+      }
     }
   }
 
@@ -273,11 +297,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // 送信ボタン
               ElevatedButton(
-                onPressed: _isSentToday ? null : _handleSend,
+                onPressed: (_isSentToday || _isSending) ? null : _handleSend,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('水質報告メール送信', style: TextStyle(fontSize: 16)),
+                child: _isSending
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Text('送信中...', style: TextStyle(fontSize: 16)),
+                        ],
+                      )
+                    : const Text('水質報告メール送信', style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(height: 16),
 
