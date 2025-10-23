@@ -72,6 +72,11 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:deprecation")
 }
 
+dependencies {
+    // AndroidX Core for edge-to-edge support
+    implementation("androidx.core:core-ktx:1.12.0")
+}
+
 flutter {
     source = "../.."
 }
