@@ -74,7 +74,8 @@ tasks.withType<JavaCompile> {
 
 dependencies {
     // AndroidX Core for edge-to-edge support
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.activity:activity-ktx:1.9.3")
 }
 
 flutter {
