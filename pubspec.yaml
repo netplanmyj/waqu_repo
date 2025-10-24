@@ -1,7 +1,7 @@
 name: waqu_repo
 description: "Water Quality Reporter - 水質報告アプリ"
 publish_to: 'none'
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ^3.9.2
@@ -47,4 +47,4 @@ flutter_launcher_icons:
   
   # Android設定
   android_gravity: "center"
-  android_min_sdk_android: 21
+  android_min_sdk_android: 24  # Android 7.0 Nougat
