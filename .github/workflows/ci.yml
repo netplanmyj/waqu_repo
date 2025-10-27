@@ -4,6 +4,7 @@ name: CI
 on:
   push:
     branches: [ main ]
+    # 一時的に他のブランチでのCIを無効化
   pull_request:
     branches: [ main ]
 
@@ -11,6 +12,7 @@ jobs:
   test:
     name: Test & Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # 5分でタイムアウト
 
     steps:
     - name: Checkout
