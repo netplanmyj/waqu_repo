@@ -6,6 +6,7 @@ class AppSettings {
   final String recipientEmail;
   final String testRecipientEmail;
   final bool isDebugMode;
+  final String emailSubject; // メール件名
   // GAS URLは非推奨だが後方互換性のために残す
   final String gasUrl;
 
@@ -14,6 +15,7 @@ class AppSettings {
     required this.recipientEmail,
     required this.testRecipientEmail,
     required this.isDebugMode,
+    this.emailSubject = '毎日検査報告', // デフォルト件名
     this.gasUrl = '',
   });
 
@@ -23,6 +25,7 @@ class AppSettings {
       recipientEmail: '',
       testRecipientEmail: '',
       isDebugMode: false,
+      emailSubject: '毎日検査報告',
       gasUrl: '',
     );
   }
@@ -32,6 +35,7 @@ class AppSettings {
     String? recipientEmail,
     String? testRecipientEmail,
     bool? isDebugMode,
+    String? emailSubject,
     String? gasUrl,
   }) {
     return AppSettings(
@@ -39,6 +43,7 @@ class AppSettings {
       recipientEmail: recipientEmail ?? this.recipientEmail,
       testRecipientEmail: testRecipientEmail ?? this.testRecipientEmail,
       isDebugMode: isDebugMode ?? this.isDebugMode,
+      emailSubject: emailSubject ?? this.emailSubject,
       gasUrl: gasUrl ?? this.gasUrl,
     );
   }
@@ -49,6 +54,7 @@ class AppSettings {
       'recipientEmail': recipientEmail,
       'testRecipientEmail': testRecipientEmail,
       'isDebugMode': isDebugMode,
+      'emailSubject': emailSubject,
       'gasUrl': gasUrl, // 後方互換性
     };
   }
@@ -59,6 +65,7 @@ class AppSettings {
       recipientEmail: json['recipientEmail'] ?? '',
       testRecipientEmail: json['testRecipientEmail'] ?? '',
       isDebugMode: json['isDebugMode'] ?? false,
+      emailSubject: json['emailSubject'] ?? '毎日検査報告',
       gasUrl: json['gasUrl'] ?? '', // 後方互換性
     );
   }

@@ -15,6 +15,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _locationNumberController;
   late TextEditingController _recipientEmailController;
   late TextEditingController _testRecipientEmailController;
+  late TextEditingController _emailSubjectController; // 件名コントローラー
   bool _isDebugMode = false;
   bool _isLoading = true;
 
@@ -24,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _locationNumberController = TextEditingController();
     _recipientEmailController = TextEditingController();
     _testRecipientEmailController = TextEditingController();
+    _emailSubjectController = TextEditingController(); // 件名初期化
     _loadSettings();
   }
 
@@ -32,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _locationNumberController.dispose();
     _recipientEmailController.dispose();
     _testRecipientEmailController.dispose();
+    _emailSubjectController.dispose(); // 件名破棄
     super.dispose();
   }
 
@@ -45,6 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _locationNumberController.text = settings.locationNumber;
       _recipientEmailController.text = settings.recipientEmail;
       _testRecipientEmailController.text = settings.testRecipientEmail;
+      _emailSubjectController.text = settings.emailSubject; // 件名ロード
       _isDebugMode = settings.isDebugMode;
       _isLoading = false;
     });
@@ -59,6 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       locationNumber: _locationNumberController.text.trim(),
       recipientEmail: _recipientEmailController.text.trim(),
       testRecipientEmail: _testRecipientEmailController.text.trim(),
+      emailSubject: _emailSubjectController.text.trim(), // 件名保存
       isDebugMode: _isDebugMode,
     );
 
@@ -143,6 +148,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         LengthLimitingTextInputFormatter(2),
                       ],
                       validator: _validateLocationNumber,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // メール件名
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'メール件名',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _emailSubjectController,
+                      decoration: const InputDecoration(
+                        hintText: '例: 毎日検査報告',
+                        border: OutlineInputBorder(),
+                        helperText: '送信するメールの件名を設定できます',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'メール件名を入力してください';
+                        }
+                        return null;
+                      },
                     ),
                   ],
                 ),

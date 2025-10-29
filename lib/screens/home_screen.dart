@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // ① 画面の状態を管理する変数
   bool _isSentToday = false;
-  String _message = 'メッセージを送信できます。';
+  String _message = 'データを入力して送信ボタンを押してください';
   bool _isDebugMode = false; // デバッグモードの状態を保持
   bool _isSending = false; // 送信中フラグ（二重送信防止）
 
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _isSentToday = false;
-          _message = 'デバッグモード: 何度でも送信可能です。';
+          _message = '【デバッグモード】何度でも送信できます';
         });
       }
       return;
@@ -76,20 +76,20 @@ class _HomeScreenState extends State<HomeScreen> {
         final lastDate = DateTime.parse(lastDateString);
         if (mounted) {
           setState(() {
-            _message = '${lastDate.month}月${lastDate.day}日は送信済みです。';
+            _message = '${lastDate.month}月${lastDate.day}日に送信済みです';
           });
         }
       } else {
         if (mounted) {
           setState(() {
-            _message = '本日の送信は完了済みです。';
+            _message = '本日は送信済みです';
           });
         }
       }
     } else {
       if (mounted) {
         setState(() {
-          _message = '送信ボタンを押してください。';
+          _message = 'データを入力して送信ボタンを押してください';
         });
       }
     }
@@ -316,10 +316,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           SizedBox(width: 12),
-                          Text('送信中...', style: TextStyle(fontSize: 16)),
+                          Text('送信中', style: TextStyle(fontSize: 16)),
                         ],
                       )
-                    : const Text('水質報告メール送信', style: TextStyle(fontSize: 16)),
+                    : const Text('送信', style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(height: 16),
 
