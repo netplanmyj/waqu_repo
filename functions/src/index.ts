@@ -30,7 +30,8 @@ export const sendWaterQualityEmail = functions.https.onCall(
           chlorine,
           locationNumber,
           recipientEmail,
-          debugMode,
+          emailSubject, // 件名パラメータ追加
+          debugMode = false,
           accessToken,
         } = data;
 
@@ -61,20 +62,21 @@ export const sendWaterQualityEmail = functions.https.onCall(
         // Gmail APIクライアントの作成
         const gmail = google.gmail({version: "v1", auth: oauth2Client});
 
-        // メール件名の設定（デバッグモード対応）
+        // メール件名の設定（カスタム件名対応、デバッグモード対応）
+        const baseSubject = emailSubject || "毎日検査報告"; // デフォルト件名
         const subject = debugMode ?
-        `[テスト送信] 毎日検査報告（地点${locationNumber || "01"})` :
-        `毎日検査報告（地点${locationNumber || "01"})`;
+        `[テスト送信] ${baseSubject}` :
+        baseSubject;
 
         // 件名をMIME-encoded-word形式でエンコード（日本語対応）
         const base64Subject = Buffer.from(subject).toString("base64");
         const encodedSubject = `=?UTF-8?B?${base64Subject}?=`;
 
-        // メール本文の作成
-        let body = `地点: ${locationNumber || "01"}\n` +
-                 `月日: ${monthDay}\n` +
-                 `測定時刻: ${time}\n` +
-                 `残留塩素: ${chlorine}\n`;
+        // メール本文の作成（半角スペース削除）
+        let body = `地点:${locationNumber || "01"}\n` +
+                 `月日:${monthDay}\n` +
+                 `測定時刻:${time}\n` +
+                 `残留塩素:${chlorine}\n`;
 
         // デバッグモードの場合はテスト送信の旨を追記
         if (debugMode) {

@@ -100,6 +100,7 @@ Future<String> sendDailyEmail({
       'time': time,
       'chlorine': chlorineFormatted,
       'locationNumber': settings.locationNumber,
+      'emailSubject': settings.emailSubject, // 件名を追加
       'recipientEmail': recipientEmail,
       'debugMode': settings.isDebugMode,
       'accessToken': credentials.accessToken.data,
