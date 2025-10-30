@@ -31,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+**/build/
 /coverage/
 
 # Symbolication related
@@ -62,6 +63,7 @@ app.*.map.json
 
 # Google Services設定ファイル（プロジェクト固有）
 /android/app/google-services.json
+/ios/GoogleService-Info.plist
 /ios/Runner/GoogleService-Info.plist
 
 # Android署名キー（機密情報）
