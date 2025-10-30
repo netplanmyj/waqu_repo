@@ -100,13 +100,28 @@ flutter test test/settings_test.dart
 ## 📊 技術仕様
 
 ### 開発環境
-- **Flutter**: 3.24.0+
-- **Dart**: 3.5.0+
-- **Target Platform**: Android
+- **Flutter**: 3.35.6
+- **Dart**: 3.9.2
+- **Target Platform**: Android (iOS版開発中)
+
+### プラットフォーム
+- **Android**: 
+  - Min SDK: 24 (Android 7.0+)
+  - Target SDK: 35 (Android 15)
+  - Package: jp.netplan.android.waqu_repo
+  - Version: 1.0.0+15
+  - 📱 [Play Store](https://play.google.com/store/apps) で公開中
+
+- **iOS**: 🚧 開発準備中
+  - 詳細: [IOS_STRATEGY.md](./IOS_STRATEGY.md) 参照
 
 ### 主要依存関係
-- `http`: Google Apps Script通信
+- `firebase_core`: Firebase 基盤
+- `firebase_auth`: Google Sign-In 認証
+- `google_sign_in`: Google アカウント認証
+- `cloud_functions`: Firebase Functions 連携
 - `shared_preferences`: ローカルデータ保存
+- `http`: HTTP通信
 - `intl`: 日付・時刻フォーマット
 
 ### データ管理
@@ -144,9 +159,28 @@ flutter test test/settings_test.dart
 - 通信エラー時の適切なエラーハンドリング
 - デバッグモードでの誤送信防止
 
-## 📈 将来の拡張予定
+## 📈 プラットフォーム対応状況
 
-- iOS対応
+### ✅ Android版（公開済み）
+- **ステータス**: Play Store で公開中
+- **バージョン**: 1.0.0+15
+- **ビジネスモデル**: 無料・広告なし
+- **特徴**: 
+  - Google Sign-In 認証
+  - Firebase Functions 経由メール送信
+  - シンプルで使いやすいUI
+
+### 🚧 iOS版（準備中）
+- **ステータス**: 開発準備中
+- **目標**: App Store リリース実績達成
+- **ビジネスモデル**: 無料・広告なし（Android版と同様）
+- **予定期間**: 4-6週間
+- **詳細ドキュメント**:
+  - [IOS_STRATEGY.md](./IOS_STRATEGY.md) - 戦略まとめ
+  - [IOS_SETUP.md](./IOS_SETUP.md) - セットアップ手順
+  - [APP_STORE_CHECKLIST.md](./APP_STORE_CHECKLIST.md) - 審査チェックリスト
+
+### 将来の拡張予定
 - 複数地点の同時管理
 - データのクラウド同期
 - レポート機能の強化
