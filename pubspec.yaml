@@ -38,8 +38,12 @@ flutter:
 # 使い方: flutter pub run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
-  ios: false  # Android専用のためfalse
+  ios: true  # iOS対応を有効化
   image_path: "assets/icon/icon.png"
+  
+  # iOS設定
+  remove_alpha_ios: true
+  ios_content_rendering: "original"
   
   # Android適応型アイコン（Android 8.0以降）
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
