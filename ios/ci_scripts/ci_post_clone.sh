@@ -7,21 +7,28 @@ set -e
 
 echo "🚀 Starting Xcode Cloud post-clone script..."
 
+# Flutter SDKのパスを設定
+FLUTTER_ROOT="$CI_WORKSPACE/flutter"
+FLUTTER_BIN="$FLUTTER_ROOT/bin/flutter"
+
 # Flutterのインストール（Xcode Cloudにはデフォルトで含まれていない）
-if ! command -v flutter > /dev/null 2>&1; then
+if [ ! -d "$FLUTTER_ROOT" ]; then
     echo "📦 Installing Flutter..."
     cd "$CI_WORKSPACE"
     git clone https://github.com/flutter/flutter.git -b stable --depth 1
-    export PATH="$PATH:$CI_WORKSPACE/flutter/bin"
     
     # Flutterのインストール確認
-    flutter --version || {
+    "$FLUTTER_BIN" --version || {
         echo "❌ Flutter installation failed"
         exit 1
     }
+    echo "✅ Flutter installed successfully"
 else
     echo "✅ Flutter already installed"
 fi
+
+# PATHに追加
+export PATH="$FLUTTER_ROOT/bin:$PATH"
 
 # プロジェクトディレクトリに移動
 cd "$CI_PRIMARY_REPOSITORY_PATH"
