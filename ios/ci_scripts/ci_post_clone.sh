@@ -75,6 +75,10 @@ fi
 echo "📦 Installing Flutter dependencies..."
 flutter pub get
 
+# iOSエンジンのプリキャッシュ（CocoaPodsに必要）
+echo "📥 Precaching iOS engine artifacts..."
+flutter precache --ios
+
 # CocoaPods依存関係のインストール
 echo "🍎 Installing CocoaPods dependencies..."
 cd ios
