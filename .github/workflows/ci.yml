@@ -26,6 +26,28 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
+    # Firebase設定ファイルをGitHub Secretsから注入
+    - name: Setup Firebase config files
+      env:
+        GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        IOS_GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
+      run: |
+        # Android用google-services.json
+        if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+          echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
+          echo "✅ Android google-services.json created"
+        else
+          echo "⚠️  GOOGLE_SERVICES_JSON secret not found - skipping Android config"
+        fi
+        
+        # iOS用GoogleService-Info.plist
+        if [ -n "$IOS_GOOGLE_SERVICE_INFO_PLIST" ]; then
+          echo "$IOS_GOOGLE_SERVICE_INFO_PLIST" | base64 -d > ios/Runner/GoogleService-Info.plist
+          echo "✅ iOS GoogleService-Info.plist created"
+        else
+          echo "⚠️  IOS_GOOGLE_SERVICE_INFO_PLIST secret not found - skipping iOS config"
+        fi
+
     - name: Analyze code
       run: flutter analyze
 
