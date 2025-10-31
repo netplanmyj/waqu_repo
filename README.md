@@ -214,3 +214,4 @@ flutter test test/settings_test.dart
 ---
 
 **💧 水質管理業務の効率化にお役立てください！**
+# Build trigger for App Store Connect upload
