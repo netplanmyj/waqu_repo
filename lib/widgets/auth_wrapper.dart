@@ -19,6 +19,53 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
+        // エラーが発生した場合
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '認証サービスに接続できません',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'エラー: ${snapshot.error}',
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        // アプリを再起動するよう促す
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => AuthWrapper(child: child),
+                          ),
+                        );
+                      },
+                      child: const Text('再試行'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
         // 認証済みの場合は元の画面を表示
         if (snapshot.hasData) {
           return child;

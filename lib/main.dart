@@ -7,8 +7,14 @@ import 'package:waqu_repo/widgets/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebaseの初期化
-  await Firebase.initializeApp();
+  // Firebaseの初期化（エラーハンドリング追加）
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // Firebase初期化エラーをログに出力
+    debugPrint('Firebase initialization error: $e');
+    // エラーが発生してもアプリは起動する
+  }
 
   // エッジツーエッジ表示のためのシステムUIオーバーレイ設定
   SystemChrome.setSystemUIOverlayStyle(
