@@ -43,7 +43,7 @@ class EmailHistory {
 
 class HistoryService {
   static const String historyKey = 'email_history';
-  static const int maxHistoryCount = 50; // 直近50件
+  static const int retentionYears = 1; // 保存期間: 1年間
 
   // 履歴を保存
   static Future<void> addHistory({
@@ -72,10 +72,10 @@ class HistoryService {
     // 日付順でソート（新しい順）
     histories.sort((a, b) => b.date.compareTo(a.date));
 
-    // 直近50件のみ保持（古いものを削除）
-    if (histories.length > maxHistoryCount) {
-      histories.removeRange(maxHistoryCount, histories.length);
-    }
+    // 1年以上前のデータを削除（閏年を考慮）
+    final now = DateTime.now();
+    final oneYearAgo = DateTime(now.year - retentionYears, now.month, now.day);
+    histories.removeWhere((history) => history.date.isBefore(oneYearAgo));
 
     // SharedPreferencesに保存
     final historyJsonList = histories.map((h) => h.toJson()).toList();
@@ -91,7 +91,28 @@ class HistoryService {
 
     try {
       final List<dynamic> historyList = json.decode(historyJson);
-      return historyList.map((json) => EmailHistory.fromJson(json)).toList();
+      var histories = historyList
+          .map((json) => EmailHistory.fromJson(json))
+          .toList();
+
+      // 1年以上前のデータを自動削除（閏年を考慮）
+      final now = DateTime.now();
+      final oneYearAgo = DateTime(
+        now.year - retentionYears,
+        now.month,
+        now.day,
+      );
+      final validHistories = histories
+          .where((history) => history.date.isAfter(oneYearAgo))
+          .toList();
+
+      // 古いデータが削除された場合は保存し直す
+      if (validHistories.length != histories.length) {
+        final historyJsonList = validHistories.map((h) => h.toJson()).toList();
+        await prefs.setString(historyKey, json.encode(historyJsonList));
+      }
+
+      return validHistories;
     } catch (e) {
       return [];
     }
