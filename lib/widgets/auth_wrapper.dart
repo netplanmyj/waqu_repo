@@ -9,11 +9,20 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🔍 AuthWrapper: Building...');
+
     return StreamBuilder<User?>(
       stream: AuthService.authStateChanges,
       builder: (context, snapshot) {
+        debugPrint(
+          '🔍 AuthWrapper: ConnectionState = ${snapshot.connectionState}',
+        );
+        debugPrint('🔍 AuthWrapper: hasError = ${snapshot.hasError}');
+        debugPrint('🔍 AuthWrapper: hasData = ${snapshot.hasData}');
+
         // ロード中
         if (snapshot.connectionState == ConnectionState.waiting) {
+          debugPrint('⏳ AuthWrapper: Waiting for auth state...');
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
@@ -21,6 +30,7 @@ class AuthWrapper extends StatelessWidget {
 
         // エラーが発生した場合
         if (snapshot.hasError) {
+          debugPrint('❌ AuthWrapper: Error occurred: ${snapshot.error}');
           return Scaffold(
             body: Center(
               child: Padding(
@@ -50,6 +60,7 @@ class AuthWrapper extends StatelessWidget {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
+                        debugPrint('🔄 AuthWrapper: Retry button pressed');
                         // アプリを再起動するよう促す
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
@@ -68,10 +79,14 @@ class AuthWrapper extends StatelessWidget {
 
         // 認証済みの場合は元の画面を表示
         if (snapshot.hasData) {
+          debugPrint('✅ AuthWrapper: User is authenticated');
           return child;
         }
 
         // 未認証の場合はサインイン画面を表示
+        debugPrint(
+          '🔐 AuthWrapper: User not authenticated, showing sign-in screen',
+        );
         return const SignInScreen();
       },
     );
