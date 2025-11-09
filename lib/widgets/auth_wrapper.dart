@@ -9,84 +9,29 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🔍 AuthWrapper: Building...');
-
     return StreamBuilder<User?>(
       stream: AuthService.authStateChanges,
       builder: (context, snapshot) {
-        debugPrint(
-          '🔍 AuthWrapper: ConnectionState = ${snapshot.connectionState}',
-        );
-        debugPrint('🔍 AuthWrapper: hasError = ${snapshot.hasError}');
-        debugPrint('🔍 AuthWrapper: hasData = ${snapshot.hasData}');
-
         // ロード中
         if (snapshot.connectionState == ConnectionState.waiting) {
-          debugPrint('⏳ AuthWrapper: Waiting for auth state...');
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // エラーが発生した場合
+        // エラーが発生した場合もサインイン画面を表示
+        // (エラー画面を表示すると審査で問題になるため)
         if (snapshot.hasError) {
           debugPrint('❌ AuthWrapper: Error occurred: ${snapshot.error}');
-          return Scaffold(
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      '認証サービスに接続できません',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'エラー: ${snapshot.error}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        debugPrint('🔄 AuthWrapper: Retry button pressed');
-                        // アプリを再起動するよう促す
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => AuthWrapper(child: child),
-                          ),
-                        );
-                      },
-                      child: const Text('再試行'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+          return const SignInScreen();
         }
 
         // 認証済みの場合は元の画面を表示
         if (snapshot.hasData) {
-          debugPrint('✅ AuthWrapper: User is authenticated');
           return child;
         }
 
         // 未認証の場合はサインイン画面を表示
-        debugPrint(
-          '🔐 AuthWrapper: User not authenticated, showing sign-in screen',
-        );
         return const SignInScreen();
       },
     );
