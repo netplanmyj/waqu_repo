@@ -7,14 +7,12 @@ import 'package:waqu_repo/widgets/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebaseの初期化（エラーハンドリング強化）
-  bool firebaseInitialized = false;
+  // Firebaseの初期化（エラーハンドリング：サイレント）
   try {
     await Firebase.initializeApp();
-    firebaseInitialized = true;
     debugPrint('✅ Firebase initialized successfully');
   } catch (e) {
-    // Firebase初期化エラーをログに出力
+    // Firebase初期化エラーをログに出力（ユーザーにはエラーを表示しない）
     debugPrint('❌ Firebase initialization error: $e');
     // エラーが発生してもアプリは起動する
   }
@@ -29,13 +27,11 @@ void main() async {
     ),
   );
 
-  runApp(MyApp(firebaseInitialized: firebaseInitialized));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool firebaseInitialized;
-
-  const MyApp({super.key, required this.firebaseInitialized});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,36 +42,7 @@ class MyApp extends StatelessWidget {
         // Android 15以降でエッジツーエッジ表示を適用
         useMaterial3: true,
       ),
-      home: firebaseInitialized
-          ? const AuthWrapper(child: HomeScreen())
-          : const Scaffold(
-              body: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 64, color: Colors.red),
-                      SizedBox(height: 16),
-                      Text(
-                        'アプリの初期化に失敗しました',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'アプリを再起動してください',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+      home: const AuthWrapper(child: HomeScreen()),
     );
   }
 }
