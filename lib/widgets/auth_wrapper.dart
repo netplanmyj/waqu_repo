@@ -2,20 +2,63 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   final Widget child;
 
   const AuthWrapper({super.key, required this.child});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _timedOut = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 10秒後にタイムアウト（ローディング画面が長時間表示されるのを防ぐ）
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted) {
+        setState(() {
+          _timedOut = true;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: AuthService.authStateChanges,
       builder: (context, snapshot) {
-        // ロード中
+        // タイムアウト時はサインイン画面を表示
+        if (_timedOut && snapshot.connectionState == ConnectionState.waiting) {
+          debugPrint(
+            '⏱️ AuthWrapper: Initialization timed out, showing SignInScreen',
+          );
+          return const SignInScreen();
+        }
+
+        // ロード中 - 視覚的に分かりやすいローディング画面
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.water_drop, size: 60, color: Colors.blue[400]),
+                  const SizedBox(height: 24),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    '読み込み中...',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
@@ -28,7 +71,7 @@ class AuthWrapper extends StatelessWidget {
 
         // 認証済みの場合は元の画面を表示
         if (snapshot.hasData) {
-          return child;
+          return widget.child;
         }
 
         // 未認証の場合はサインイン画面を表示
