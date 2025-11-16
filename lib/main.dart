@@ -5,24 +5,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:waqu_repo/screens/home_screen.dart';
 import 'package:waqu_repo/widgets/auth_wrapper.dart';
 
-void main() async {
+void main() {
+  // 重要: asyncを削除し、初期化を待たずに即座にアプリを起動
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Firebaseの初期化（タイムアウト付き）
-  try {
-    await Firebase.initializeApp().timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        debugPrint('⏱️ Firebase initialization timed out after 10 seconds');
-        throw TimeoutException('Firebase initialization timeout');
-      },
-    );
-    debugPrint('✅ Firebase initialized successfully');
-  } catch (e) {
-    // Firebase初期化エラーをログに出力（ユーザーにはエラーを表示しない）
-    debugPrint('❌ Firebase initialization error: $e');
-    // エラーが発生してもアプリは起動する
-  }
 
   // エッジツーエッジ表示のためのシステムUIオーバーレイ設定
   SystemChrome.setSystemUIOverlayStyle(
@@ -34,11 +19,40 @@ void main() async {
     ),
   );
 
+  // アプリを即座に起動（白い画面を回避）
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Firebase初期化をバックグラウンドで実行
+    _initializeFirebase();
+  }
+
+  Future<void> _initializeFirebase() async {
+    try {
+      await Firebase.initializeApp().timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {
+          debugPrint('⏱️ Firebase initialization timed out');
+          throw TimeoutException('Firebase timeout');
+        },
+      );
+      debugPrint('✅ Firebase initialized successfully');
+    } catch (e) {
+      debugPrint('❌ Firebase initialization error: $e');
+      // エラーでも継続（AuthWrapperで処理）
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +63,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
-        // Android 15以降でエッジツーエッジ表示を適用
         useMaterial3: true,
       ),
+      // 初期化中でも画面を表示（AuthWrapperが処理）
       home: const AuthWrapper(child: HomeScreen()),
     );
   }

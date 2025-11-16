@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../services/auth_service.dart';
 
 class AuthWrapper extends StatefulWidget {
@@ -13,12 +14,14 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _timedOut = false;
+  bool _firebaseInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    // 10秒後にタイムアウト（ローディング画面が長時間表示されるのを防ぐ）
-    Future.delayed(const Duration(seconds: 10), () {
+    _checkFirebaseInit();
+    // 5秒後にタイムアウト（より短く設定して確実に画面を表示）
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         setState(() {
           _timedOut = true;
@@ -27,8 +30,56 @@ class _AuthWrapperState extends State<AuthWrapper> {
     });
   }
 
+  Future<void> _checkFirebaseInit() async {
+    // Firebase初期化を待つ（最大8秒）
+    for (int i = 0; i < 40; i++) {
+      try {
+        Firebase.app(); // デフォルトアプリが存在するかチェック
+        if (mounted) {
+          setState(() {
+            _firebaseInitialized = true;
+          });
+        }
+        debugPrint('✅ Firebase is ready in AuthWrapper');
+        return;
+      } catch (e) {
+        // まだ初期化されていない
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+    }
+    // タイムアウト
+    debugPrint('⏱️ Firebase initialization timeout in AuthWrapper');
+    if (mounted) {
+      setState(() {
+        _firebaseInitialized = true; // エラーでも続行
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Firebase初期化待ち
+    if (!_firebaseInitialized) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.water_drop, size: 60, color: Colors.blue[400]),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                '初期化中...',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return StreamBuilder<User?>(
       stream: AuthService.authStateChanges,
       builder: (context, snapshot) {
