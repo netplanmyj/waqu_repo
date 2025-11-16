@@ -85,4 +85,8 @@ cd ios
 pod install
 cd ..
 
+# Flutter build準備（Xcode Cloudのビルドエラー対策）
+echo "🔨 Preparing Flutter build for Xcode Cloud..."
+flutter build ios --release --no-codesign
+
 echo "✅ Post-clone script completed successfully!"
