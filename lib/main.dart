@@ -1,13 +1,15 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:waqu_repo/screens/home_screen.dart';
 import 'package:waqu_repo/widgets/auth_wrapper.dart';
 
-void main() {
-  // 重要: asyncを削除し、初期化を待たずに即座にアプリを起動
+void main() async {
+  // Flutter binding の初期化
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase の初期化（必ず runApp より前に完了させる）
+  await Firebase.initializeApp();
 
   // エッジツーエッジ表示のためのシステムUIオーバーレイ設定
   SystemChrome.setSystemUIOverlayStyle(
@@ -19,40 +21,11 @@ void main() {
     ),
   );
 
-  // アプリを即座に起動（白い画面を回避）
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    // Firebase初期化をバックグラウンドで実行
-    _initializeFirebase();
-  }
-
-  Future<void> _initializeFirebase() async {
-    try {
-      await Firebase.initializeApp().timeout(
-        const Duration(seconds: 8),
-        onTimeout: () {
-          debugPrint('⏱️ Firebase initialization timed out');
-          throw TimeoutException('Firebase timeout');
-        },
-      );
-      debugPrint('✅ Firebase initialized successfully');
-    } catch (e) {
-      debugPrint('❌ Firebase initialization error: $e');
-      // エラーでも継続（AuthWrapperで処理）
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
