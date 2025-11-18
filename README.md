@@ -1,4 +1,4 @@
-# 水質報告アプリ (Water Quality Reporter)
+# 水質検査報告アプリ (Water Quality Reporter)
 
 水道施設の残留塩素濃度を測定し、メール報告を自動化するFlutterアプリです。
 

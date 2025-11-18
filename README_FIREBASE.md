@@ -1,4 +1,4 @@
-# WAQU水質報告アプリ - Firebase Functions版
+# WAQU水質検査報告アプリ - Firebase Functions版
 
 > **重要**: このブランチ（2-oauth）では、メール送信がGAS（Google Apps Script）からFirebase Functions + Gmail APIに移行されています。
 

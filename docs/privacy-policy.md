@@ -136,7 +136,7 @@ https://www.googleapis.com/auth/gmail.send
 ユーザーはいつでも権限を取り消すことができます：
 
 1. [Googleアカウントのセキュリティページ](https://myaccount.google.com/permissions)にアクセス
-2. 「水質報告アプリ」を選択
+2. 「水質検査報告アプリ」を選択
 3. 「アクセス権を削除」をクリック
 
 権限を取り消すと、本アプリはメール送信機能を使用できなくなります。

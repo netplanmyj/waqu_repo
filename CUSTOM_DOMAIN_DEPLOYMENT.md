@@ -32,7 +32,7 @@ https://yourdomain.com/
 ├── index.html                        ← メインサイト
 ├── about.html
 ├── contact.html
-└── waqu/                             ← 水質報告アプリ専用コーナー
+└── waqu/                             ← 水質検査報告アプリ専用コーナー
     ├── index.html                    ← アプリ紹介ページ
     ├── privacy-policy.html           ← プライバシーポリシー
     └── terms.html                    ← 利用規約（任意）
