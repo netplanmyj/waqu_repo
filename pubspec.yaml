@@ -1,5 +1,5 @@
 name: waqu_repo
-description: "Water Quality Reporter - 水質報告アプリ"
+description: "Water Quality Reporter - 水質検査報告アプリ"
 publish_to: 'none'
 version: 1.0.0+21
 

@@ -181,7 +181,7 @@ const { title, description } = Astro.props;
 ```markdown
 ---
 title: "プライバシーポリシー"
-description: "水質報告アプリのプライバシーポリシー"
+description: "水質検査報告アプリのプライバシーポリシー"
 layout: ../../layouts/WaquLayout.astro
 ---
 
@@ -258,7 +258,7 @@ import Note from '../../components/Note.astro';
 ---
 
 <div class="hero">
-  <h1>💧 水質報告アプリ</h1>
+  <h1>💧 水質検査報告アプリ</h1>
   <p>水道施設の残留塩素濃度を簡単にメール報告</p>
 </div>
 
@@ -422,4 +422,4 @@ npm install -D @astrojs/markdoc
 
 ---
 
-これで、Astroサイトに水質報告アプリのページを簡単に統合できます！
+これで、Astroサイトに水質検査報告アプリのページを簡単に統合できます！

@@ -182,7 +182,7 @@ class _SignInScreenState extends State<SignInScreen> {
             const Icon(Icons.water_drop, size: 80, color: Colors.blue),
             const SizedBox(height: 32),
             const Text(
-              '水質報告アプリ',
+              '水質検査報告アプリ',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
