@@ -64,8 +64,8 @@ echo "📂 Working in: $(pwd)"
 # Xcode CloudのEnvironment Variablesで設定する必要があります
 if [ -n "$IOS_GOOGLE_SERVICE_INFO_PLIST" ]; then
     echo "🔑 Injecting GoogleService-Info.plist from environment..."
-    # テンプレートファイルを上書き（Xcodeプロジェクトに登録済み）
-    echo "$IOS_GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/Runner/GoogleService-Info.plist.template
+    # 実ファイルを生成（Xcodeプロジェクトに登録済み）
+    echo "$IOS_GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/Runner/GoogleService-Info.plist
     echo "✅ iOS GoogleService-Info.plist injected"
 else
     echo "⚠️  IOS_GOOGLE_SERVICE_INFO_PLIST environment variable not found"
