@@ -10,7 +10,9 @@ import 'history_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool isDemoMode;
+
+  const HomeScreen({super.key, this.isDemoMode = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -127,12 +129,22 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      // 送信処理の実行
-      final result = await sendDailyEmail(time: time, chlorine: chlorine);
+      // デモモードの場合は実際の送信をスキップ
+      final String result;
+      if (widget.isDemoMode) {
+        // デモモード: 送信をシミュレート
+        await Future.delayed(const Duration(seconds: 1));
+        result = '【デモモード】送信をシミュレートしました\n時刻: $time\n残留塩素: $chlorine mg/L';
+      } else {
+        // 通常モード: 実際に送信
+        result = await sendDailyEmail(time: time, chlorine: chlorine);
+      }
 
-      // 送信後に状態をチェック（デバッグモードも考慮）
+      // 送信後に状態をチェック（デバッグモードも考慮、デモモードは除外）
       if (mounted) {
-        _checkSentStatus();
+        if (!widget.isDemoMode) {
+          _checkSentStatus();
+        }
 
         setState(() {
           // 送信結果をメッセージに設定
@@ -158,9 +170,34 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('水質報告メール送信'),
         backgroundColor: Colors.blue[600],
         foregroundColor: Colors.white,
+        // デモモードバナーを表示
+        bottom: widget.isDemoMode
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(32),
+                child: Container(
+                  color: Colors.orange[700],
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.preview, size: 16, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Demo Mode (for App Review)',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
         actions: [
-          // ユーザー情報表示（デバッグモード時はダミー情報）
-          if (AuthService.userEmail != null)
+          // ユーザー情報表示（デモモード時はダミー情報）
+          if (widget.isDemoMode || AuthService.userEmail != null)
             GestureDetector(
               onTap: _showAccountDialog,
               child: Padding(
@@ -177,11 +214,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       CircleAvatar(
                         radius: 12,
-                        backgroundImage: AuthService.userPhotoUrl != null
+                        backgroundImage:
+                            !widget.isDemoMode &&
+                                AuthService.userPhotoUrl != null
                             ? NetworkImage(AuthService.userPhotoUrl!)
                             : null,
                         backgroundColor: Colors.blue[300],
-                        child: AuthService.userPhotoUrl == null
+                        child:
+                            !widget.isDemoMode &&
+                                    AuthService.userPhotoUrl == null ||
+                                widget.isDemoMode
                             ? const Icon(
                                 Icons.person,
                                 size: 14,
@@ -191,7 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _isDebugMode
+                        widget.isDemoMode
+                            ? 'demo@example.com'
+                            : _isDebugMode
                             ? 'demo-user' // デバッグモード時のダミー名
                             : AuthService.userEmail!.split('@')[0],
                         style: const TextStyle(fontSize: 12),
