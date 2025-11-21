@@ -370,9 +370,153 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 32),
+
+            // アカウント削除セクション
+            Card(
+              color: Colors.red[50],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.delete_forever, color: Colors.red[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'アカウント削除',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: Colors.red[600]),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'アカウントを削除すると、以下のデータが完全に削除されます:',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '• 認証情報（Google/Apple Sign-In）\n'
+                      '• アプリ内の設定データ\n'
+                      '• 送信履歴\n\n'
+                      'この操作は取り消せません。',
+                      style: TextStyle(fontSize: 12, color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _showDeleteAccountDialog,
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('アカウントを削除'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[600],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  // アカウント削除確認ダイアログ
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.red),
+              SizedBox(width: 8),
+              Text('アカウント削除の確認'),
+            ],
+          ),
+          content: const Text(
+            'アカウントを削除してもよろしいですか？\n\n'
+            'この操作により、以下が完全に削除されます:\n'
+            '• 認証情報\n'
+            '• アプリ内の設定\n'
+            '• 送信履歴\n\n'
+            'この操作は取り消せません。',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('キャンセル'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteAccount();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[600],
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('削除する'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // アカウント削除処理
+  Future<void> _deleteAccount() async {
+    try {
+      // ローディング表示
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(child: CircularProgressIndicator());
+        },
+      );
+
+      // アカウント削除実行
+      await AuthService.deleteAccount();
+
+      // ローディングを閉じる
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // 成功メッセージを表示してサインイン画面に戻る
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('アカウントを削除しました'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // サインイン画面に戻る（全ての画面をクリア）
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      // ローディングを閉じる
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // エラーメッセージを表示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('アカウント削除に失敗しました: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
