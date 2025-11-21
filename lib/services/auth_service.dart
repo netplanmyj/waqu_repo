@@ -167,6 +167,32 @@ class AuthService {
     }
   }
 
+  // アカウント削除
+  static Future<void> deleteAccount() async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        throw Exception('ユーザーが見つかりません');
+      }
+
+      // Google Sign-Inアカウントの切断（該当する場合）
+      try {
+        await _googleSignIn.disconnect();
+      } catch (e) {
+        debugPrint('⚠️ Google Sign-In切断エラー（無視）: $e');
+        // Googleでサインインしていない場合はエラーが出るが無視
+      }
+
+      // Firebase Authenticationからアカウント削除
+      await user.delete();
+
+      debugPrint('✅ アカウントを削除しました');
+    } catch (e) {
+      debugPrint('❌ アカウント削除エラー: $e');
+      throw Exception('アカウント削除に失敗しました: $e');
+    }
+  }
+
   // 認証状態を確認
   static bool get isSignedIn => currentUser != null;
 
