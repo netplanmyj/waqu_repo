@@ -141,11 +141,12 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  bool _isLoading = false;
+  bool _isLoadingGoogle = false;
+  bool _isLoadingApple = false;
 
   Future<void> _signInWithGoogle() async {
     setState(() {
-      _isLoading = true;
+      _isLoadingGoogle = true;
     });
 
     try {
@@ -161,7 +162,30 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (mounted) {
       setState(() {
-        _isLoading = false;
+        _isLoadingGoogle = false;
+      });
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _isLoadingApple = true;
+    });
+
+    try {
+      await AuthService.signInWithApple();
+      // 認証成功時は自動的にHomeScreenに遷移する
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('認証に失敗しました: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoadingApple = false;
       });
     }
   }
@@ -202,14 +226,17 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'メール送信にはGoogleアカウントでのサインインが必要です',
+              'GoogleまたはAppleアカウントでサインインしてください',
               style: TextStyle(fontSize: 16, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 48),
+            // Google Sign-In ボタン
             ElevatedButton.icon(
-              onPressed: _isLoading ? null : _signInWithGoogle,
-              icon: _isLoading
+              onPressed: (_isLoadingGoogle || _isLoadingApple)
+                  ? null
+                  : _signInWithGoogle,
+              icon: _isLoadingGoogle
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -227,12 +254,38 @@ class _SignInScreenState extends State<SignInScreen> {
                       },
                     ),
               label: Text(
-                _isLoading ? 'サインイン中...' : 'Googleでサインイン',
+                _isLoadingGoogle ? 'サインイン中...' : 'Googleでサインイン',
                 style: const TextStyle(fontSize: 16),
               ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: Colors.blue[600],
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Apple Sign-In ボタン
+            ElevatedButton.icon(
+              onPressed: (_isLoadingGoogle || _isLoadingApple)
+                  ? null
+                  : _signInWithApple,
+              icon: _isLoadingApple
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.apple, color: Colors.white),
+              label: Text(
+                _isLoadingApple ? 'サインイン中...' : 'Appleでサインイン',
+                style: const TextStyle(fontSize: 16),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
               ),
             ),

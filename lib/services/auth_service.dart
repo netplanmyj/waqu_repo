@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -53,6 +57,63 @@ class AuthService {
       debugPrint('❌ Google認証エラー: $e');
       throw Exception('Google認証に失敗しました: $e');
     }
+  }
+
+  // Apple認証でサインイン
+  static Future<UserCredential?> signInWithApple() async {
+    try {
+      // ランダムな文字列を生成（セキュリティのため）
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      // Apple Sign-Inリクエストを作成
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      // Firebase認証用のクレデンシャルを作成
+      final oauthCredential = OAuthProvider(
+        "apple.com",
+      ).credential(idToken: appleCredential.identityToken, rawNonce: rawNonce);
+
+      // Firebase Authにサインイン
+      final userCredential = await _auth.signInWithCredential(oauthCredential);
+
+      // 初回サインイン時に表示名を設定
+      if (appleCredential.givenName != null &&
+          appleCredential.familyName != null) {
+        final displayName =
+            '${appleCredential.familyName} ${appleCredential.givenName}';
+        await userCredential.user?.updateDisplayName(displayName);
+      }
+
+      return userCredential;
+    } catch (e) {
+      debugPrint('❌ Apple認証エラー: $e');
+      throw Exception('Apple認証に失敗しました: $e');
+    }
+  }
+
+  // ランダムな文字列を生成
+  static String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
+  }
+
+  // SHA256ハッシュを生成
+  static String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   // Gmail APIアクセス用のクレデンシャルを取得

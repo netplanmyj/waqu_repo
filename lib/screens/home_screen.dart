@@ -40,7 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _checkSentStatus();
+    // デモモードでない場合のみ送信状態をチェック
+    if (!widget.isDemoMode) {
+      _checkSentStatus();
+    }
   }
 
   // ② 状態チェックと更新のロジック
