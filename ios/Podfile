@@ -1,3 +1,8 @@
+# CocoaPods sources
+# CDNがタイムアウトした場合、GitHubリポジトリにフォールバック
+source 'https://cdn.cocoapods.org/'
+source 'https://github.com/CocoaPods/Specs.git'
+
 # Uncomment this line to define a global platform for your project
 platform :ios, '13.0'
 
