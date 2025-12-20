@@ -6,12 +6,14 @@ import '../services/history_service.dart';
 class HistoryCard extends StatelessWidget {
   final EmailHistory history;
   final VoidCallback? onTap;
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
+  final String? locationNumber;
 
   const HistoryCard({
     required this.history,
     this.onTap,
-    required this.onLongPress,
+    this.onLongPress,
+    this.locationNumber,
     super.key,
   });
 
@@ -53,6 +55,16 @@ class HistoryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
+            if (locationNumber != null) ...[
+              Row(
+                children: [
+                  Icon(Icons.place, size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text('地点: $locationNumber'),
+                ],
+              ),
+              const SizedBox(height: 2),
+            ],
             Row(
               children: [
                 Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
