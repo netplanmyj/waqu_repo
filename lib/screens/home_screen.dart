@@ -2,10 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import '../services/gmail_service.dart';
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/account_dialog.dart';
+import '../services/history_service.dart';
+import '../widgets/history_card.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 
@@ -24,6 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String _message = 'データを入力して送信ボタンを押してください';
   bool _isDebugMode = false; // デバッグモードの状態を保持
   bool _isSending = false; // 送信中フラグ（二重送信防止）
+  bool _isLastHistoryLoading = false;
+  bool _isDateInitialized = false;
+  EmailHistory? _lastHistory;
+  String _locationNumber = '01';
 
   // ② 入力フォーム用のコントローラー
   final TextEditingController _timeController = TextEditingController();
@@ -44,12 +51,34 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!widget.isDemoMode) {
       _checkSentStatus();
     }
+
+    // 日付ロケール初期化（HistoryCardがja_JPを使うため）
+    _initializeDateFormatting();
+
+    // 送信履歴の最新1件を読み込む（デモモードでも表示）
+    _loadLastHistory();
+  }
+
+  Future<void> _initializeDateFormatting() async {
+    await initializeDateFormatting('ja_JP', null);
+    if (mounted) {
+      setState(() {
+        _isDateInitialized = true;
+      });
+    }
   }
 
   // ② 状態チェックと更新のロジック
   void _checkSentStatus() async {
     // 設定を取得してデバッグモードを確認
     final settings = await SettingsService.getSettings();
+
+    // 地点番号を保持
+    if (mounted) {
+      setState(() {
+        _locationNumber = settings.locationNumber;
+      });
+    }
 
     // デバッグモードの状態を保存
     if (mounted) {
@@ -97,6 +126,22 @@ class _HomeScreenState extends State<HomeScreen> {
           _message = 'データを入力して送信ボタンを押してください';
         });
       }
+    }
+  }
+
+  Future<void> _loadLastHistory() async {
+    setState(() {
+      _isLastHistoryLoading = true;
+    });
+
+    final histories = await HistoryService.getHistories();
+    final latest = histories.isNotEmpty ? histories.first : null;
+
+    if (mounted) {
+      setState(() {
+        _lastHistory = latest;
+        _isLastHistoryLoading = false;
+      });
     }
   }
 
@@ -148,6 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
         if (!widget.isDemoMode) {
           _checkSentStatus();
         }
+
+        // 最新履歴を更新
+        _loadLastHistory();
 
         setState(() {
           // 送信結果をメッセージに設定
@@ -386,6 +434,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 16),
+
+              // 前回の送信カード
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '前回の送信',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_isLastHistoryLoading || !_isDateInitialized)
+                const Center(child: CircularProgressIndicator())
+              else if (_lastHistory != null)
+                HistoryCard(
+                  history: _lastHistory!,
+                  onTap: null,
+                  onLongPress: null,
+                  locationNumber: _locationNumber,
+                )
+              else
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'まだ送信履歴がありません',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
             ],
           ),
         ),

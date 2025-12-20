@@ -134,5 +134,53 @@ void main() {
       await tester.pump();
       expect(longPressed, isTrue);
     });
+
+    testWidgets('地点が表示される', (WidgetTester tester) async {
+      final history = EmailHistory(
+        date: DateTime(2025, 10, 14, 9, 30),
+        time: '0930',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: false,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HistoryCard(
+              history: history,
+              onLongPress: () {},
+              locationNumber: '01',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('地点: 01'), findsOneWidget);
+    });
+
+    testWidgets('地点が指定されない場合は表示されない', (WidgetTester tester) async {
+      final history = EmailHistory(
+        date: DateTime(2025, 10, 14, 9, 30),
+        time: '0930',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: false,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HistoryCard(
+              history: history,
+              onLongPress: () {},
+              locationNumber: null,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('地点:'), findsNothing);
+    });
   });
 }

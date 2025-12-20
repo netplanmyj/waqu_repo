@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import '../services/history_service.dart';
+import '../services/settings_service.dart';
 import '../widgets/history_card.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -14,11 +15,13 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   List<EmailHistory> histories = [];
   bool isLoading = true;
+  String _locationNumber = '01';
 
   @override
   void initState() {
     super.initState();
     _initializeDateFormatting();
+    _loadSettings();
   }
 
   Future<void> _initializeDateFormatting() async {
@@ -36,6 +39,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       histories = loadedHistories;
       isLoading = false;
     });
+  }
+
+  Future<void> _loadSettings() async {
+    final settings = await SettingsService.getSettings();
+    if (mounted) {
+      setState(() {
+        _locationNumber = settings.locationNumber;
+      });
+    }
   }
 
   @override
@@ -105,6 +117,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ? () => _showErrorDialog(history)
                     : null,
                 onLongPress: () => _showDeleteConfirmDialog(history),
+                locationNumber: _locationNumber,
               );
             },
           ),
