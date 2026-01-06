@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // ① 画面の状態を管理する変数
   bool _isSentToday = false;
   String _message = 'データを入力して送信ボタンを押してください';
@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isDateInitialized = false;
   EmailHistory? _lastHistory;
   String _locationNumber = '01';
+  DateTime? _lastCheckedDate; // Issue #124: 最後に日付チェックを実行した日時を記録
 
   // ② 入力フォーム用のコントローラー
   final TextEditingController _timeController = TextEditingController();
@@ -39,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    // Issue #124: WidgetsBindingObserverの登録を解除
+    WidgetsBinding.instance.removeObserver(this);
     _timeController.dispose();
     _chlorineController.dispose();
     super.dispose();
@@ -47,9 +50,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Issue #124: WidgetsBindingObserverを登録してライフサイクルを監視
+    WidgetsBinding.instance.addObserver(this);
+
     // デモモードでない場合のみ送信状態をチェック
     if (!widget.isDemoMode) {
       _checkSentStatus();
+      // Issue #124: 初回チェック時の日付を記録
+      _lastCheckedDate = DateTime.now();
     }
 
     // 日付ロケール初期化（HistoryCardがja_JPを使うため）
@@ -65,6 +73,32 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isDateInitialized = true;
       });
+    }
+  }
+
+  // Issue #124: アプリケーションのライフサイクル変化を監視
+  // アプリが resumed になった時に日付の変更を確認して送信状態を更新
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // アプリがフォアグラウンドに戻ってきた
+      // デモモード以外で、かつ日付が変わっていないかチェック
+      if (!widget.isDemoMode && _lastCheckedDate != null) {
+        final now = DateTime.now();
+        final lastChecked = _lastCheckedDate!;
+
+        // 日付が変わっているかチェック（年月日が異なるか）
+        final dateChanged =
+            lastChecked.year != now.year ||
+            lastChecked.month != now.month ||
+            lastChecked.day != now.day;
+
+        if (dateChanged) {
+          // 日付が変わった場合は送信状態を再チェック
+          _checkSentStatus();
+          _lastCheckedDate = now;
+        }
+      }
     }
   }
 
