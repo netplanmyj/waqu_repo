@@ -55,9 +55,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // デモモードでない場合のみ送信状態をチェック
     if (!widget.isDemoMode) {
-      _checkSentStatus();
-      // Issue #124: 初回チェック時の日付を記録
-      _lastCheckedDate = DateTime.now();
+      // Issue #124: 非同期チェックを実行し、完了後に日付を記録（競合状態を回避）
+      Future.microtask(() async {
+        await _checkSentStatus();
+        _lastCheckedDate = DateTime.now();
+      });
     }
 
     // 日付ロケール初期化（HistoryCardがja_JPを使うため）
@@ -95,15 +97,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         if (dateChanged) {
           // 日付が変わった場合は送信状態を再チェック
-          _checkSentStatus();
-          _lastCheckedDate = now;
+          Future.microtask(() async {
+            await _checkSentStatus();
+            _lastCheckedDate = now;
+          });
         }
       }
     }
   }
 
   // ② 状態チェックと更新のロジック
-  void _checkSentStatus() async {
+  Future<void> _checkSentStatus() async {
     // 設定を取得してデバッグモードを確認
     final settings = await SettingsService.getSettings();
 

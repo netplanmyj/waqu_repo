@@ -2,6 +2,12 @@
 //
 // Issue #124: 送信後にアプリを開いたままで日付が変わったときの挙動テスト
 // アプリを開いたままで日付が変わった場合に、ライフサイクルリスナーが日付変更を検知することを確認
+//
+// 注: これらのテストは日付比較ロジックを検証するためのユニットテストです。
+// 実際のHomeScreenウィジェットの統合テストではなく、
+// SharedPreferencesとDateTime比較ロジックの動作を確認しています。
+// HomeScreenの実際の動作は、多くの依存関係（AuthService, GmailService等）を
+// 必要とするため、別の統合テストで検証することが推奨されます。
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 // 日付をモック化するためのヘルパークラス
+// 注: このヘルパーは本番コード（HomeScreen）では使用されていません。
+// テスト内のロジック検証のみに使用されています。
 class MockDateTimeHelper {
   static DateTime? _mockNow;
 
@@ -108,6 +116,12 @@ void main() {
     testWidgets('【Issue #124修正確認】WidgetsBindingObserverが日付変更を検知するメカニズム', (
       WidgetTester tester,
     ) async {
+      // 注: このテストは日付比較ロジックの動作を検証しています。
+      // 実際のHomeScreenウィジェットではなく、モックのStatefulBuilderを使用して
+      // SharedPreferencesとDateTime比較の挙動を確認しています。
+      // HomeScreenの実際のWidgetsBindingObserver実装は、アプリ内の手動テストや
+      // より高レベルの統合テストで検証する必要があります。
+      //
       // テストシナリオ：
       // 1. 2026-01-05に送信済み
       // 2. 2026-01-05 23:59:59の時点でアプリを起動（送信ボタンが無効）
