@@ -182,5 +182,32 @@ void main() {
 
       expect(find.textContaining('地点:'), findsNothing);
     });
+
+    testWidgets('カスタムマージンがカードに適用される', (WidgetTester tester) async {
+      final history = EmailHistory(
+        date: DateTime(2025, 10, 14, 9, 30),
+        time: '0930',
+        chlorine: 0.45,
+        success: true,
+        isDebugMode: false,
+      );
+
+      const customMargin = EdgeInsets.all(4);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HistoryCard(
+              history: history,
+              onLongPress: () {},
+              margin: customMargin,
+            ),
+          ),
+        ),
+      );
+
+      final card = tester.widget<Card>(find.byType(Card));
+      expect(card.margin, customMargin);
+    });
   });
 }

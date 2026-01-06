@@ -49,7 +49,6 @@ class HistoryCard extends StatelessWidget {
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                softWrap: false,
               ),
             ),
             if (history.isDebugMode) _buildDebugBadge(),
