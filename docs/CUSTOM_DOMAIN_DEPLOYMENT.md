@@ -147,7 +147,7 @@ aws s3 website s3://yourdomain-waqu --index-document index.html
 
 #### ファイルアップロード
 ```bash
-aws s3 sync docs/ s3://yourdomain-waqu/ --acl public-read
+aws s3 sync webdocs/ s3://yourdomain-waqu/ --acl public-read
 ```
 
 #### CloudFront設定
@@ -166,7 +166,7 @@ aws s3 sync docs/ s3://yourdomain-waqu/ --acl public-read
 4. ビルド設定:
    ```
    Build command: (空欄)
-   Publish directory: docs
+   Publish directory: webdocs
    ```
 5. カスタムドメイン設定:
    - Site settings → Domain management

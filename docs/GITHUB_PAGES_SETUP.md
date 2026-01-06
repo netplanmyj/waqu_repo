@@ -7,7 +7,7 @@
 ### Step 1: ファイルをGitHubにプッシュ
 
 ```bash
-git add docs/
+git add webdocs/
 git add PRIVACY_POLICY.md OAUTH_VERIFICATION.md README.md
 git commit -m "Add privacy policy and GitHub Pages setup"
 git push origin main
@@ -24,7 +24,7 @@ git push origin main
 
 4. **Source** セクションで設定:
    - **Branch**: `main`
-   - **Folder**: `/docs`
+   - **Folder**: `/webdocs`
    - **Save** をクリック
 
 5. 数分待つと、以下のURLで公開されます:
@@ -52,10 +52,10 @@ Google Cloud Consoleで以下のURLを入力：
 
 ### 2. プライバシーポリシーの更新
 
-`docs/privacy-policy.html`と`PRIVACY_POLICY.md`の以下の箇所を更新：
+`webdocs/privacy-policy.html`と`PRIVACY_POLICY.md`の以下の箇所を更新：
 
 ```html
-<!-- docs/privacy-policy.html -->
+<!-- webdocs/privacy-policy.html -->
 <strong>開発者</strong>: [あなたの名前]<br>
 <strong>メールアドレス</strong>: <a href="mailto:your-email@example.com">your-email@example.com</a>
 ```
@@ -68,7 +68,7 @@ Google Cloud Consoleで以下のURLを入力：
 
 ### 3. ホームページの更新
 
-`docs/index.html`の以下の箇所を更新：
+`webdocs/index.html`の以下の箇所を更新：
 
 ```html
 <p><strong>メールアドレス</strong>: <a href="mailto:your-email@example.com">your-email@example.com</a></p>
