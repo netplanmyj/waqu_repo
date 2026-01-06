@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'auth_wrapper.dart';
 
 class AccountDialog extends StatelessWidget {
   final bool isDebugMode;
@@ -76,13 +77,21 @@ class AccountDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            Navigator.of(context).pop();
-
-            // contextを非同期処理前に保存
+            final navigator = Navigator.of(context);
             final messenger = ScaffoldMessenger.of(context);
+
+            navigator.pop();
 
             try {
               await AuthService.signOut();
+
+              // Demoモードでは認証状態のストリームが変化しないため、明示的にサインイン画面へ戻す
+              if (isDemoMode) {
+                navigator.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const SignInScreen()),
+                  (route) => false,
+                );
+              }
             } catch (e) {
               messenger.showSnackBar(
                 SnackBar(
