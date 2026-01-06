@@ -363,154 +363,165 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const Text(
-                '測定データを入力してください',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const Text(
+                  '測定データを入力してください',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
 
-              // 測定時刻入力
-              TextFormField(
-                controller: _timeController,
-                decoration: const InputDecoration(
-                  labelText: '測定時刻（4桁）',
-                  hintText: '例: 0950',
-                  border: OutlineInputBorder(),
+                // 測定時刻入力
+                TextFormField(
+                  controller: _timeController,
+                  decoration: const InputDecoration(
+                    labelText: '測定時刻（4桁）',
+                    hintText: '例: 0950',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '測定時刻を入力してください';
+                    }
+                    if (value.length != 4 ||
+                        !RegExp(r'^\d{4}$').hasMatch(value)) {
+                      return '4桁の数字で入力してください';
+                    }
+                    return null;
+                  },
                 ),
-                keyboardType: TextInputType.number,
-                maxLength: 4,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '測定時刻を入力してください';
-                  }
-                  if (value.length != 4 ||
-                      !RegExp(r'^\d{4}$').hasMatch(value)) {
-                    return '4桁の数字で入力してください';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // 残留塩素入力
-              TextFormField(
-                controller: _chlorineController,
-                decoration: const InputDecoration(
-                  labelText: '残留塩素',
-                  hintText: '例: 0.40',
-                  border: OutlineInputBorder(),
-                  suffixText: 'mg/L',
+                // 残留塩素入力
+                TextFormField(
+                  controller: _chlorineController,
+                  decoration: const InputDecoration(
+                    labelText: '残留塩素',
+                    hintText: '例: 0.40',
+                    border: OutlineInputBorder(),
+                    suffixText: 'mg/L',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '残留塩素を入力してください';
+                    }
+                    final double? chlorine = double.tryParse(value);
+                    if (chlorine == null) {
+                      return '数値で入力してください';
+                    }
+                    if (chlorine < 0 || chlorine > 10) {
+                      return '0〜10の範囲で入力してください';
+                    }
+                    return null;
+                  },
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '残留塩素を入力してください';
-                  }
-                  final double? chlorine = double.tryParse(value);
-                  if (chlorine == null) {
-                    return '数値で入力してください';
-                  }
-                  if (chlorine < 0 || chlorine > 10) {
-                    return '0〜10の範囲で入力してください';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // 送信ボタン
-              ElevatedButton(
-                onPressed: (_isSentToday || _isSending) ? null : _handleSend,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isSending
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                // 送信ボタン
+                ElevatedButton(
+                  onPressed: (_isSentToday || _isSending) ? null : _handleSend,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSending
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 12),
-                          Text('送信中', style: TextStyle(fontSize: 16)),
-                        ],
-                      )
-                    : const Text('送信', style: TextStyle(fontSize: 16)),
-              ),
-              const SizedBox(height: 16),
-
-              // メッセージ表示
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
+                            SizedBox(width: 12),
+                            Text('送信中', style: TextStyle(fontSize: 16)),
+                          ],
+                        )
+                      : const Text('送信', style: TextStyle(fontSize: 16)),
                 ),
-                child: Text(
-                  _message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: _isSentToday ? Colors.green[700] : Colors.blue[700],
-                    fontSize: 14,
-                  ),
-                ),
-              ),
+                const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
-
-              // 前回の送信カード
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '前回の送信',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (_isLastHistoryLoading || !_isDateInitialized)
-                const Center(child: CircularProgressIndicator())
-              else if (_lastHistory != null)
-                HistoryCard(
-                  history: _lastHistory!,
-                  onTap: null,
-                  onLongPress: null,
-                  locationNumber: _locationNumber,
-                )
-              else
+                // メッセージ表示
                 Container(
-                  width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'まだ送信履歴がありません',
-                    style: TextStyle(color: Colors.grey[600]),
+                    _message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _isSentToday
+                          ? Colors.green[700]
+                          : Colors.blue[700],
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-            ],
+
+                const SizedBox(height: 16),
+
+                // 前回の送信カード
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '前回の送信',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (_isLastHistoryLoading || !_isDateInitialized)
+                  const Center(child: CircularProgressIndicator())
+                else if (_lastHistory != null)
+                  HistoryCard(
+                    history: _lastHistory!,
+                    onTap: null,
+                    onLongPress: null,
+                    locationNumber: _locationNumber,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                  )
+                else
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'まだ送信履歴がありません',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

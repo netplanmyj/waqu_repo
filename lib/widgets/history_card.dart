@@ -8,12 +8,14 @@ class HistoryCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final String? locationNumber;
+  final EdgeInsetsGeometry margin;
 
   const HistoryCard({
     required this.history,
     this.onTap,
     this.onLongPress,
     this.locationNumber,
+    this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     super.key,
   });
 
@@ -23,7 +25,7 @@ class HistoryCard extends StatelessWidget {
     final isToday = _isToday(history.date);
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: margin,
       child: ListTile(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -38,14 +40,16 @@ class HistoryCard extends StatelessWidget {
         ),
         title: Row(
           children: [
-            Flexible(
+            Expanded(
               child: Text(
                 dateFormat.format(history.date),
                 style: TextStyle(
                   fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                   color: isToday ? Colors.blue[700] : null,
                 ),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                softWrap: false,
               ),
             ),
             if (history.isDebugMode) _buildDebugBadge(),
