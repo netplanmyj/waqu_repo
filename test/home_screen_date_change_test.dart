@@ -126,7 +126,6 @@ void main() {
       final beforeMidnight = DateTime(2026, 1, 5, 23, 59, 59);
       MockDateTimeHelper.setMockNow(beforeMidnight);
 
-      int checkSentStatusCallCount = 0;
       bool isSentTodayState = false;
       late void Function(void Function()) setStateFunc;
 
