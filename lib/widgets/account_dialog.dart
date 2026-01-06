@@ -3,8 +3,13 @@ import '../services/auth_service.dart';
 
 class AccountDialog extends StatelessWidget {
   final bool isDebugMode;
+  final bool isDemoMode;
 
-  const AccountDialog({super.key, required this.isDebugMode});
+  const AccountDialog({
+    super.key,
+    required this.isDebugMode,
+    required this.isDemoMode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +58,14 @@ class AccountDialog extends StatelessWidget {
             ),
           _buildInfoRow(
             '名前',
-            isDebugMode ? 'Demo User' : (AuthService.userName ?? 'ユーザー'),
+            isDemoMode ? 'Demo User' : (AuthService.userName ?? 'ユーザー'),
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             'メールアドレス',
-            isDebugMode ? 'demo@example.com' : AuthService.userEmail!,
+            isDemoMode
+                ? 'demo@example.com'
+                : (AuthService.userEmail ?? 'user@example.com'),
           ),
         ],
       ),
