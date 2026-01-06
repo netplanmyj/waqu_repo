@@ -99,7 +99,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '直近50件の送信履歴を表示しています',
+                  '過去1年分の送信履歴を表示しています',
                   style: TextStyle(color: Colors.blue[700], fontSize: 14),
                 ),
               ),
