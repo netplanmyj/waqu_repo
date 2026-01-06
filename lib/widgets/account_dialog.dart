@@ -66,7 +66,7 @@ class AccountDialog extends StatelessWidget {
             'メールアドレス',
             isDemoMode
                 ? 'demo@example.com'
-                : (AuthService.userEmail ?? 'user@example.com'),
+                : (AuthService.userEmail ?? 'メールアドレス不明'),
           ),
         ],
       ),
@@ -91,6 +91,17 @@ class AccountDialog extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const SignInScreen()),
                   (route) => false,
                 );
+              } else {
+                // 非Demoモードでは認証状態のストリームの更新を待つが、タイムアウトを設定して
+                // 万が一ストリームが更新されない場合に備える
+                await Future.delayed(const Duration(seconds: 2));
+                // ここで認証状態が更新されていない場合は、明示的にサインイン画面へ戻す
+                if (navigator.canPop()) {
+                  navigator.pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const SignInScreen()),
+                    (route) => false,
+                  );
+                }
               }
             } catch (e) {
               messenger.showSnackBar(
