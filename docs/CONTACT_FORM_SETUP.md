@@ -88,7 +88,7 @@
 - リクエスト内容（削除/訂正）
 ```
 
-### docs/privacy-policy.html
+### webdocs/privacy-policy.html
 
 ```html
 <div class="important-box">
@@ -99,7 +99,7 @@
 </div>
 ```
 
-### docs/index.html
+### webdocs/index.html
 
 ```html
 <div class="contact">
@@ -185,7 +185,7 @@
 1. [ ] Google Formsでフォーム作成
 2. [ ] フォームURLを取得
 3. [ ] PRIVACY_POLICY.md更新
-4. [ ] docs/privacy-policy.html更新
-5. [ ] docs/index.html更新
+4. [ ] webdocs/privacy-policy.html更新
+5. [ ] webdocs/index.html更新
 6. [ ] GitHub Pagesで公開
 7. [ ] OAuth審査申請時に使用

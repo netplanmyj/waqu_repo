@@ -53,12 +53,12 @@
 ```
 
 **修正したファイル**:
-- [x] `docs/index.md` - ホームページ
-- [x] `docs/privacy-policy.md` - プライバシーポリシー
+- [x] `webdocs/index.md` - ホームページ
+- [x] `webdocs/privacy-policy.md` - プライバシーポリシー
 - [x] `pubspec.yaml` - アプリ設定（確認済み）
 - [ ] Google Cloud Console - OAuth同意画面（要更新）
 
-### 2. ホームページの改善（docs/index.md）
+### 2. ホームページの改善（webdocs/index.md）
 
 #### 追加した重要セクション:
 
@@ -186,7 +186,7 @@ URL: https://netplan.co.jp/library/waqu_repo/privacy/
 
 ### ステップ1: ホームページの更新を確認
 
-- [x] `docs/index.md` を更新（完了）
+- [x] `webdocs/index.md` を更新（完了）
 - [ ] Astroサイトにデプロイ
 - [ ] https://netplan.co.jp/library/waqu_repo/ で確認
 - [ ] アプリの目的が明確に表示されているか確認

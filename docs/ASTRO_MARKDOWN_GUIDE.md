@@ -4,8 +4,8 @@ HTMLファイルをAstro対応のMarkdown形式に変換しました。
 
 ## 📁 作成ファイル
 
-1. **`docs/index.md`** - アプリ紹介ページ
-2. **`docs/privacy-policy.md`** - プライバシーポリシー
+1. **`webdocs/index.md`** - アプリ紹介ページ
+2. **`webdocs/privacy-policy.md`** - プライバシーポリシー
 
 ---
 
@@ -15,8 +15,8 @@ HTMLファイルをAstro対応のMarkdown形式に変換しました。
 
 ```bash
 # Astroプロジェクトにコピー
-cp docs/index.md your-astro-project/src/pages/waqu/index.md
-cp docs/privacy-policy.md your-astro-project/src/pages/waqu/privacy-policy.md
+cp webdocs/index.md your-astro-project/src/pages/waqu/index.md
+cp webdocs/privacy-policy.md your-astro-project/src/pages/waqu/privacy-policy.md
 ```
 
 **アクセスURL**:
@@ -51,8 +51,8 @@ export const collections = {
 
 ```bash
 mkdir -p your-astro-project/src/content/waqu/
-cp docs/index.md your-astro-project/src/content/waqu/index.md
-cp docs/privacy-policy.md your-astro-project/src/content/waqu/privacy-policy.md
+cp webdocs/index.md your-astro-project/src/content/waqu/index.md
+cp webdocs/privacy-policy.md your-astro-project/src/content/waqu/privacy-policy.md
 ```
 
 #### ステップ3: ページ作成

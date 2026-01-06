@@ -38,11 +38,11 @@
 ```
 
 **更新したファイル**:
-- ✅ `docs/index.md` - ホームページ
-- ✅ `docs/privacy-policy.md` - プライバシーポリシー
+- ✅ `webdocs/index.md` - ホームページ
+- ✅ `webdocs/privacy-policy.md` - プライバシーポリシー
 - ✅ `pubspec.yaml` - すでに正しい（確認済み）
 
-### 2. ホームページの大幅改善（docs/index.md）
+### 2. ホームページの大幅改善（webdocs/index.md）
 
 #### 追加したセクション:
 
