@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'auth_wrapper.dart';
 
 class AccountDialog extends StatelessWidget {
   final bool isDebugMode;
+  final bool isDemoMode;
 
-  const AccountDialog({super.key, required this.isDebugMode});
+  const AccountDialog({
+    super.key,
+    required this.isDebugMode,
+    required this.isDemoMode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +59,14 @@ class AccountDialog extends StatelessWidget {
             ),
           _buildInfoRow(
             '名前',
-            isDebugMode ? 'Demo User' : (AuthService.userName ?? 'ユーザー'),
+            isDemoMode ? 'Demo User' : (AuthService.userName ?? 'ユーザー'),
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             'メールアドレス',
-            isDebugMode ? 'demo@example.com' : AuthService.userEmail!,
+            isDemoMode
+                ? 'demo@example.com'
+                : (AuthService.userEmail ?? 'メールアドレス不明'),
           ),
         ],
       ),
@@ -69,13 +77,32 @@ class AccountDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            Navigator.of(context).pop();
-
-            // contextを非同期処理前に保存
+            final navigator = Navigator.of(context);
             final messenger = ScaffoldMessenger.of(context);
+
+            navigator.pop();
 
             try {
               await AuthService.signOut();
+
+              // Demoモードでは認証状態のストリームが変化しないため、明示的にサインイン画面へ戻す
+              if (isDemoMode) {
+                navigator.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const SignInScreen()),
+                  (route) => false,
+                );
+              } else {
+                // 非Demoモードでは認証状態のストリームの更新を待つが、タイムアウトを設定して
+                // 万が一ストリームが更新されない場合に備える
+                await Future.delayed(const Duration(seconds: 2));
+                // ここで認証状態が更新されていない場合は、明示的にサインイン画面へ戻す
+                if (navigator.canPop()) {
+                  navigator.pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const SignInScreen()),
+                    (route) => false,
+                  );
+                }
+              }
             } catch (e) {
               messenger.showSnackBar(
                 SnackBar(

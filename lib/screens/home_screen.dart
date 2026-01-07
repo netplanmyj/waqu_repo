@@ -527,7 +527,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _showAccountDialog() {
     showDialog(
       context: context,
-      builder: (context) => AccountDialog(isDebugMode: _isDebugMode),
+      builder: (context) => AccountDialog(
+        isDebugMode: _isDebugMode,
+        isDemoMode: widget.isDemoMode,
+      ),
     );
   }
 }
