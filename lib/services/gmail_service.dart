@@ -126,23 +126,16 @@ Future<String> sendDailyEmail({
           options: HttpsCallableOptions(timeout: timeout),
         );
 
-        final result = await callable
-            .call({
-              'monthDay': monthDay,
-              'time': time,
-              'chlorine': chlorineFormatted,
-              'locationNumber': settings.locationNumber,
-              'emailSubject': settings.emailSubject, // 件名を追加
-              'recipientEmail': recipientEmail,
-              'debugMode': settings.isDebugMode,
-              'accessToken': credentials.accessToken.data,
-            })
-            .timeout(
-              timeout,
-              onTimeout: () {
-                throw Exception('Firebase Functions呼び出しがタイムアウトしました');
-              },
-            );
+        final result = await callable.call({
+          'monthDay': monthDay,
+          'time': time,
+          'chlorine': chlorineFormatted,
+          'locationNumber': settings.locationNumber,
+          'emailSubject': settings.emailSubject, // 件名を追加
+          'recipientEmail': recipientEmail,
+          'debugMode': settings.isDebugMode,
+          'accessToken': credentials.accessToken.data,
+        });
 
         data = result.data as Map<String, dynamic>;
         debugPrint('✅ Firebase Functions呼び出し成功');
@@ -154,8 +147,8 @@ Future<String> sendDailyEmail({
 
         // 最後の試行でない場合、かつネットワークエラーの場合のみリトライ
         if (attempt < maxRetries - 1 && _isRetriableNetworkError(e)) {
-          // 指数バックオフで待機
-          final waitTime = Duration(seconds: 2 * (attempt + 1));
+          // 指数バックオフで待機（1秒, 2秒, 4秒, ...）
+          final waitTime = Duration(seconds: 1 << attempt);
           debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
           await Future.delayed(waitTime);
           continue;

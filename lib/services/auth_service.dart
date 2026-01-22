@@ -85,8 +85,8 @@ class AuthService {
 
         // 最後の試行でない場合、または再試行可能なエラーの場合のみリトライ
         if (attempt < maxRetries - 1 && _isRetriableError(e)) {
-          // 指数バックオフで待機
-          final waitTime = Duration(milliseconds: 1000 * (attempt + 1));
+          // 指数バックオフで待機（1秒, 2秒, 4秒, ...）
+          final waitTime = Duration(seconds: 1 << attempt);
           debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
           await Future.delayed(waitTime);
           continue;
@@ -187,10 +187,9 @@ class AuthService {
               onTimeout: () => null,
             );
 
-        // それでもnullの場合、明示的に再認証を促す
+        // それでもnullの場合、例外をスロー（リトライロジックで対応）
         if (account == null) {
-          debugPrint('❌ Google Sign-In アカウントが見つかりません。再認証が必要です');
-          return null;
+          throw Exception('Google Sign-In アカウントが見つかりません。再認証が必要です');
         }
 
         final GoogleSignInAuthentication googleAuth = await account
