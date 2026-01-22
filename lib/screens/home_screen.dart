@@ -338,9 +338,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ? NetworkImage(AuthService.userPhotoUrl!)
                     : null,
                 backgroundColor: Colors.blue[300],
-                child:
-                    !widget.isDemoMode && AuthService.userPhotoUrl == null ||
-                        widget.isDemoMode
+                child: widget.isDemoMode || AuthService.userPhotoUrl == null
                     ? const Icon(Icons.person, size: 14, color: Colors.white)
                     : null,
               ),
