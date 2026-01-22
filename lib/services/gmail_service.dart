@@ -8,6 +8,20 @@ import 'package:waqu_repo/services/auth_service.dart';
 // 日付を保存するキー
 const String lastSentDateKey = 'lastSentDate';
 
+// ネットワークエラーが再試行可能かどうかを判定
+bool _isRetriableNetworkError(dynamic error) {
+  final errorString = error.toString().toLowerCase();
+  // ネットワーク関連エラー、タイムアウト、一時的なエラーは再試行可能
+  return errorString.contains('network') ||
+      errorString.contains('timeout') ||
+      errorString.contains('interrupted') ||
+      errorString.contains('unreachable') ||
+      errorString.contains('connection') ||
+      errorString.contains('network-request-failed') ||
+      errorString.contains('unavailable') ||
+      errorString.contains('deadline-exceeded');
+}
+
 Future<bool> isSentToday() async {
   final prefs = await SharedPreferences.getInstance();
   final lastDateString = prefs.getString(lastSentDateKey);
@@ -81,32 +95,74 @@ Future<String> sendDailyEmail({
           : '送信先メールアドレスが設定されていません。';
     }
 
-    // 4. Firebase Functions呼び出し
-    // Firebase認証トークンを明示的にリフレッシュ
-    final firebaseToken = await AuthService.currentUser?.getIdToken(
-      true,
-    ); // true = force refresh
-    if (firebaseToken == null) {
-      debugPrint('❌ Firebase IDトークンの取得に失敗しました');
-      return 'Firebase認証トークンの取得に失敗しました。再度サインインしてください。';
+    // 4. Firebase Functions呼び出し（リトライロジック付き）
+    const maxRetries = 3;
+    const timeout = Duration(seconds: 45);
+    Map<String, dynamic>? data;
+
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        debugPrint('🔄 メール送信試行 ${attempt + 1}/$maxRetries');
+
+        // Firebase認証トークンを明示的にリフレッシュ
+        final firebaseToken = await AuthService.currentUser
+            ?.getIdToken(true) // true = force refresh
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                throw Exception('Firebase IDトークンの取得がタイムアウトしました');
+              },
+            );
+
+        if (firebaseToken == null) {
+          debugPrint('❌ Firebase IDトークンの取得に失敗しました');
+          return 'Firebase認証トークンの取得に失敗しました。再度サインインしてください。';
+        }
+
+        // リージョンを明示的に指定（us-central1）
+        final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+        final callable = functions.httpsCallable(
+          'sendWaterQualityEmail',
+          options: HttpsCallableOptions(timeout: timeout),
+        );
+
+        final result = await callable.call({
+          'monthDay': monthDay,
+          'time': time,
+          'chlorine': chlorineFormatted,
+          'locationNumber': settings.locationNumber,
+          'emailSubject': settings.emailSubject, // 件名を追加
+          'recipientEmail': recipientEmail,
+          'debugMode': settings.isDebugMode,
+          'accessToken': credentials.accessToken.data,
+        });
+
+        data = result.data as Map<String, dynamic>;
+        debugPrint('✅ Firebase Functions呼び出し成功');
+        break; // 成功したのでループを抜ける
+      } catch (e) {
+        debugPrint(
+          '❌ Firebase Functions呼び出しエラー (試行 ${attempt + 1}/$maxRetries): $e',
+        );
+
+        // 最後の試行でない場合、かつネットワークエラーの場合のみリトライ
+        if (attempt < maxRetries - 1 && _isRetriableNetworkError(e)) {
+          // 指数バックオフで待機（1秒, 2秒, 4秒, ...）
+          final waitTime = Duration(seconds: 1 << attempt);
+          debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
+          await Future.delayed(waitTime);
+          continue;
+        }
+
+        // 再試行できない、またはすべての試行が失敗した場合
+        rethrow;
+      }
     }
 
-    // リージョンを明示的に指定（us-central1）
-    final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
-    final callable = functions.httpsCallable('sendWaterQualityEmail');
-
-    final result = await callable.call({
-      'monthDay': monthDay,
-      'time': time,
-      'chlorine': chlorineFormatted,
-      'locationNumber': settings.locationNumber,
-      'emailSubject': settings.emailSubject, // 件名を追加
-      'recipientEmail': recipientEmail,
-      'debugMode': settings.isDebugMode,
-      'accessToken': credentials.accessToken.data,
-    });
-
-    final data = result.data as Map<String, dynamic>;
+    // データがnullの場合（すべての試行が失敗）
+    if (data == null) {
+      throw Exception('メール送信に失敗しました: 最大試行回数に達しました');
+    }
 
     if (data['status'] == 'success') {
       // 成功時：最終送信日を保存（デバッグモード時は保存しない）
@@ -171,8 +227,14 @@ Future<String> sendDailyEmail({
       } catch (_) {
         errorMessage = 'Firebase Functions呼び出しエラー';
       }
+    } else if (e.toString().contains('network-request-failed')) {
+      errorMessage = 'ネットワークエラーが発生しました。インターネット接続を確認して、再度お試しください。';
+    } else if (e.toString().contains('timeout')) {
+      errorMessage = '通信がタイムアウトしました。しばらく時間をおいてから再度お試しください。';
     } else if (e.toString().contains('network')) {
       errorMessage = 'インターネット接続を確認してください';
+    } else if (e.toString().contains('unavailable')) {
+      errorMessage = 'サービスが一時的に利用できません。しばらく時間をおいてから再度お試しください。';
     }
 
     final fullErrorMessage = '$errorMessage\n\n技術詳細: ${e.toString()}';
