@@ -101,8 +101,9 @@ for ((i=1; i<=MAX_PUB_RETRIES; i++)); do
         break
     else
         if [ $i -lt $MAX_PUB_RETRIES ]; then
-            echo "⚠️  pub get failed, retrying in 10s..."
-            sleep 10
+            RETRY_DELAY=$((5 * (2 ** (i - 1))))
+            echo "⚠️  pub get failed, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
         else
             echo "❌ Failed to install dependencies after $MAX_PUB_RETRIES attempts"
             exit 1
@@ -120,8 +121,9 @@ for ((i=1; i<=MAX_CACHE_RETRIES; i++)); do
         break
     else
         if [ $i -lt $MAX_CACHE_RETRIES ]; then
-            echo "⚠️  precache failed, retrying in 10s..."
-            sleep 10
+            RETRY_DELAY=$((5 * (2 ** (i - 1))))
+            echo "⚠️  precache failed, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
         else
             echo "⚠️  precache failed but continuing (may not be critical)"
         fi
@@ -131,7 +133,23 @@ done
 # CocoaPods依存関係のインストール
 echo "🍎 Installing CocoaPods dependencies..."
 cd ios
-pod install --repo-update || pod install
+MAX_POD_RETRIES=3
+for ((i=1; i<=MAX_POD_RETRIES; i++)); do
+    echo "🔄 pod install --repo-update (attempt $i/$MAX_POD_RETRIES)..."
+    if pod install --repo-update; then
+        echo "✅ CocoaPods dependencies installed successfully"
+        break
+    else
+        if [ $i -lt $MAX_POD_RETRIES ]; then
+            RETRY_DELAY=$((5 * (2 ** (i - 1))))
+            echo "⚠️  pod install failed, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+        else
+            echo "❌ Failed to install CocoaPods dependencies after $MAX_POD_RETRIES attempts"
+            exit 1
+        fi
+    fi
+done
 cd ..
 
 # Flutter build準備（Xcode Cloudのビルドエラー対策）
