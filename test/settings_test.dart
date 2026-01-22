@@ -1,7 +1,7 @@
 // 設定サービスのテスト（簡素化版）
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:waqu_repo/services/settings_service.dart';
+import '../lib/services/settings_service.dart';
 
 void main() {
   group('設定サービス基本テスト', () {
@@ -35,7 +35,10 @@ void main() {
       expect(copiedSettings.gasUrl, originalSettings.gasUrl);
       expect(copiedSettings.locationNumber, originalSettings.locationNumber);
       expect(copiedSettings.recipientEmail, originalSettings.recipientEmail);
-      expect(copiedSettings.testRecipientEmail, originalSettings.testRecipientEmail);
+      expect(
+        copiedSettings.testRecipientEmail,
+        originalSettings.testRecipientEmail,
+      );
       expect(copiedSettings.isDebugMode, true);
     });
   });

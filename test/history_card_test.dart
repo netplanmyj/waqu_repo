@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:waqu_repo/services/history_service.dart';
-import 'package:waqu_repo/widgets/history_card.dart';
+import '../lib/services/history_service.dart';
+import '../lib/widgets/history_card.dart';
 
 void main() {
   group('HistoryCard ウィジェットテスト', () {

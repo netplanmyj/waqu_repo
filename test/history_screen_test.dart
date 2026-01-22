@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:waqu_repo/screens/history_screen.dart';
-import 'package:waqu_repo/services/history_service.dart';
-import 'package:waqu_repo/services/settings_service.dart';
+import '../lib/screens/history_screen.dart';
+import '../lib/services/history_service.dart';
+import '../lib/services/settings_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
