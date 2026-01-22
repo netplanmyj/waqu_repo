@@ -2,7 +2,7 @@
 // Firebase Functionsに移行後のため、基本的な設定テストのみ
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:waqu_repo/services/settings_service.dart';
+import '../lib/services/settings_service.dart';
 
 void main() {
   group('メール送信関連設定テスト', () {

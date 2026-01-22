@@ -1,7 +1,7 @@
 // 履歴サービスのテスト（最小限版）
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:waqu_repo/services/history_service.dart';
+import '../lib/services/history_service.dart';
 
 void main() {
   group('履歴サービス基本テスト', () {
