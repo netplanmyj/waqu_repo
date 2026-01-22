@@ -23,40 +23,82 @@ class AuthService {
   // 認証状態のストリーム
   static Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Google認証でサインイン
-  static Future<UserCredential?> signInWithGoogle() async {
-    try {
-      // Google Sign-Inフローを開始
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  // Google認証でサインイン（リトライロジック付き）
+  static Future<UserCredential?> signInWithGoogle({
+    int maxRetries = 3,
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        debugPrint('🔄 Google認証試行 ${attempt + 1}/$maxRetries');
 
-      if (googleUser == null) {
-        // ユーザーがサインインをキャンセルした場合
-        return null;
+        // Google Sign-Inフローを開始（タイムアウト付き）
+        final GoogleSignInAccount? googleUser = await _googleSignIn
+            .signIn()
+            .timeout(
+              timeout,
+              onTimeout: () {
+                throw Exception('Google Sign-Inがタイムアウトしました');
+              },
+            );
+
+        if (googleUser == null) {
+          // ユーザーがサインインをキャンセルした場合
+          return null;
+        }
+
+        // Google認証の詳細を取得
+        final GoogleSignInAuthentication googleAuth = await googleUser
+            .authentication
+            .timeout(
+              timeout,
+              onTimeout: () {
+                throw Exception('認証情報の取得がタイムアウトしました');
+              },
+            );
+
+        if (googleAuth.accessToken == null) {
+          debugPrint('❌ アクセストークンがnullです');
+          throw Exception('アクセストークンの取得に失敗しました');
+        }
+
+        // Firebase認証用のクレデンシャルを作成
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // Firebase Authにサインイン（タイムアウト付き）
+        final userCredential = await _auth
+            .signInWithCredential(credential)
+            .timeout(
+              timeout,
+              onTimeout: () {
+                throw Exception('Firebase認証がタイムアウトしました');
+              },
+            );
+
+        debugPrint('✅ Google認証成功');
+        return userCredential;
+      } catch (e) {
+        debugPrint('❌ Google認証エラー (試行 ${attempt + 1}/$maxRetries): $e');
+
+        // 最後の試行でない場合、または再試行可能なエラーの場合のみリトライ
+        if (attempt < maxRetries - 1 && _isRetriableError(e)) {
+          // 指数バックオフで待機
+          final waitTime = Duration(milliseconds: 1000 * (attempt + 1));
+          debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
+          await Future.delayed(waitTime);
+          continue;
+        }
+
+        // 再試行不可能なエラー、またはすべてのリトライが失敗した場合
+        throw Exception('Google認証に失敗しました: $e');
       }
-
-      // Google認証の詳細を取得
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      if (googleAuth.accessToken == null) {
-        debugPrint('❌ アクセストークンがnullです');
-        throw Exception('アクセストークンの取得に失敗しました');
-      }
-
-      // Firebase認証用のクレデンシャルを作成
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Firebase Authにサインイン
-      final userCredential = await _auth.signInWithCredential(credential);
-
-      return userCredential;
-    } catch (e) {
-      debugPrint('❌ Google認証エラー: $e');
-      throw Exception('Google認証に失敗しました: $e');
     }
+
+    // すべての試行が失敗した場合（通常はここに到達しない）
+    throw Exception('Google認証に失敗しました: 最大試行回数に達しました');
   }
 
   // Apple認証でサインイン
@@ -116,45 +158,98 @@ class AuthService {
     return digest.toString();
   }
 
-  // Gmail APIアクセス用のクレデンシャルを取得
-  static Future<auth.AccessCredentials?> getGmailCredentials() async {
-    try {
-      // currentUserがnullの場合、silentSignInを試行
-      GoogleSignInAccount? account =
-          _googleSignIn.currentUser ?? await _googleSignIn.signInSilently();
+  // エラーが再試行可能かどうかを判定
+  static bool _isRetriableError(dynamic error) {
+    final errorString = error.toString().toLowerCase();
+    // ネットワークエラー、タイムアウト、一時的なエラーは再試行可能
+    return errorString.contains('network') ||
+        errorString.contains('timeout') ||
+        errorString.contains('interrupted') ||
+        errorString.contains('unreachable') ||
+        errorString.contains('connection') ||
+        errorString.contains('network-request-failed');
+  }
 
-      // それでもnullの場合、明示的に再認証を促す
-      if (account == null) {
-        debugPrint('❌ Google Sign-In アカウントが見つかりません。再認証が必要です');
+  // Gmail APIアクセス用のクレデンシャルを取得（リトライロジック付き）
+  static Future<auth.AccessCredentials?> getGmailCredentials({
+    int maxRetries = 3,
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        debugPrint('🔄 Gmail認証情報取得試行 ${attempt + 1}/$maxRetries');
+
+        // currentUserがnullの場合、silentSignInを試行（タイムアウト付き）
+        GoogleSignInAccount? account =
+            _googleSignIn.currentUser ??
+            await _googleSignIn.signInSilently().timeout(
+              timeout,
+              onTimeout: () => null,
+            );
+
+        // それでもnullの場合、明示的に再認証を促す
+        if (account == null) {
+          debugPrint('❌ Google Sign-In アカウントが見つかりません。再認証が必要です');
+          return null;
+        }
+
+        final GoogleSignInAuthentication googleAuth = await account
+            .authentication
+            .timeout(
+              timeout,
+              onTimeout: () {
+                throw Exception('認証情報の取得がタイムアウトしました');
+              },
+            );
+
+        if (googleAuth.accessToken == null) {
+          debugPrint('❌ アクセストークンが取得できませんでした');
+
+          // アクセストークンがnullの場合、再試行可能なエラーとして扱う
+          if (attempt < maxRetries - 1) {
+            final waitTime = Duration(milliseconds: 1000 * (attempt + 1));
+            debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
+            await Future.delayed(waitTime);
+            continue;
+          }
+          return null;
+        }
+
+        // googleapis_authのAccessCredentialsを作成
+        final credentials = auth.AccessCredentials(
+          auth.AccessToken(
+            'Bearer',
+            googleAuth.accessToken!,
+            DateTime.now().toUtc().add(
+              const Duration(hours: 1),
+            ), // UTC時間で1時間の有効期限
+          ),
+          null, // リフレッシュトークンは必要に応じて設定
+          ['https://www.googleapis.com/auth/gmail.send'],
+        );
+
+        debugPrint('✅ Gmail認証情報取得成功');
+        return credentials;
+      } catch (e) {
+        debugPrint(
+          '❌ Gmail APIクレデンシャル取得エラー (試行 ${attempt + 1}/$maxRetries): $e',
+        );
+
+        // 最後の試行でない場合、再試行可能なエラーの場合のみリトライ
+        if (attempt < maxRetries - 1 && _isRetriableError(e)) {
+          final waitTime = Duration(milliseconds: 1000 * (attempt + 1));
+          debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
+          await Future.delayed(waitTime);
+          continue;
+        }
+
         return null;
       }
-
-      final GoogleSignInAuthentication googleAuth =
-          await account.authentication;
-
-      if (googleAuth.accessToken == null) {
-        debugPrint('❌ アクセストークンが取得できませんでした');
-        return null;
-      }
-
-      // googleapis_authのAccessCredentialsを作成
-      final credentials = auth.AccessCredentials(
-        auth.AccessToken(
-          'Bearer',
-          googleAuth.accessToken!,
-          DateTime.now().toUtc().add(
-            const Duration(hours: 1),
-          ), // UTC時間で1時間の有効期限
-        ),
-        null, // リフレッシュトークンは必要に応じて設定
-        ['https://www.googleapis.com/auth/gmail.send'],
-      );
-
-      return credentials;
-    } catch (e) {
-      debugPrint('❌ Gmail APIクレデンシャル取得エラー: $e');
-      return null;
     }
+
+    // すべての試行が失敗した場合
+    debugPrint('❌ Gmail認証情報取得失敗: 最大試行回数に達しました');
+    return null;
   }
 
   // サインアウト
