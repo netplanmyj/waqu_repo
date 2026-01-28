@@ -146,6 +146,10 @@ gh api repos/netplanmyj/waqu_repo/pulls/141/comments | jq '.[] | {path: .path, l
 ### PR マージ
 
 ```bash
+# 一般的な形式
+gh pr merge <PR番号> --merge --delete-branch
+
+# 例: PR #147 をマージする場合
 gh pr merge 147 --merge --delete-branch
 ```
 
