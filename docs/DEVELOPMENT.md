@@ -8,8 +8,9 @@
 2. [GitHub CLIの使用方法](#github-cliの使用方法)
 3. [コード品質維持](#コード品質維持)
 4. [テストガイドライン](#テストガイドライン)
-5. [PR作成手順](#pr作成手順)
-6. [トラブルシューティング](#トラブルシューティング)
+5. [ビルド](#ビルド)
+6. [PR作成手順](#pr作成手順)
+7. [トラブルシューティング](#トラブルシューティング)
 
 ## 開発フロー
 
@@ -140,6 +141,12 @@ gh api repos/netplanmyj/waqu_repo/pulls/141/comments | jq '.[] | {path: .path, l
   "line": 50,
   "body": "このコードはより簡潔に書けます"
 }
+```
+
+### PR マージ
+
+```bash
+gh pr merge 147 --merge --delete-branch
 ```
 
 ## コード品質維持
@@ -362,6 +369,20 @@ gh pr create --title "refactor: 機能名" --body-file pr_body.txt
 - 各ファイルが300行以下に削減
 - テストの追加が容易に
 - 再利用性の向上
+
+## ビルド
+
+### Play Store 向け（AAB）
+
+```bash
+flutter build appbundle --release
+```
+
+### APK（検証・手動配布向け）
+
+```bash
+flutter build apk --release
+```
 
 ## PR作成手順
 
