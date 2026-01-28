@@ -108,7 +108,7 @@ Future<String> sendDailyEmail({
         final firebaseToken = await AuthService.currentUser
             ?.getIdToken(true) // true = force refresh
             .timeout(
-              const Duration(seconds: 15),
+              const Duration(seconds: 30),
               onTimeout: () {
                 throw Exception('Firebase IDトークンの取得がタイムアウトしました');
               },
