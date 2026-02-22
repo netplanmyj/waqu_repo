@@ -51,7 +51,19 @@ flutter build apk --release
 build/app/outputs/flutter-apk/app-release.apk
 ```
 
-### ステップ5: APKファイルの確認
+### ステップ5: Play Store提出用AABのビルド
+
+```bash
+# リリース用AABビルド
+flutter build appbundle --release
+```
+
+ビルドが完了すると、以下の場所にAABファイルが生成されます：
+```
+build/app/outputs/bundle/release/app-release.aab
+```
+
+### ステップ6: APKファイルの確認
 
 生成されたAPKファイルの詳細を確認：
 
