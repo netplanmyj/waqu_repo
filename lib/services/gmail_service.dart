@@ -10,6 +10,17 @@ const String lastSentDateKey = 'lastSentDate';
 
 // ネットワークエラーが再試行可能かどうかを判定
 bool _isRetriableNetworkError(dynamic error) {
+  if (error is FirebaseFunctionsException) {
+    const retriableCodes = {
+      'deadline-exceeded',
+      'unavailable',
+      'resource-exhausted',
+      'internal',
+      'unknown',
+    };
+    return retriableCodes.contains(error.code);
+  }
+
   final errorString = error.toString().toLowerCase();
   // ネットワーク関連エラー、タイムアウト、一時的なエラーは再試行可能
   return errorString.contains('network') ||
@@ -41,9 +52,21 @@ Future<String> sendDailyEmail({
   required String time,
   required double chlorine,
 }) async {
+  final overallStopwatch = Stopwatch()..start();
+  bool overallLogged = false;
+
+  String finishWithLog(String message) {
+    if (!overallLogged) {
+      overallLogged = true;
+      overallStopwatch.stop();
+      debugPrint('⏱️ 送信処理合計: ${overallStopwatch.elapsedMilliseconds}ms');
+    }
+    return message;
+  }
+
   // 認証チェック
   if (!AuthService.isSignedIn) {
-    return 'Googleアカウントにサインインしてください。';
+    return finishWithLog('Googleアカウントにサインインしてください。');
   }
 
   // 設定を取得（デバッグモード確認のため）
@@ -57,25 +80,28 @@ Future<String> sendDailyEmail({
 
     if (lastDateString != null) {
       final lastDate = DateTime.parse(lastDateString);
-      return '${lastDate.month}月${lastDate.day}日は送信済みです。';
+      return finishWithLog('${lastDate.month}月${lastDate.day}日は送信済みです。');
     } else {
-      return '既に本日の送信は完了しています。';
+      return finishWithLog('既に本日の送信は完了しています。');
     }
   }
 
   try {
     // 2. Gmail APIアクセス用のクレデンシャルを取得
+    final gmailStopwatch = Stopwatch()..start();
     final credentials = await AuthService.getGmailCredentials();
+    gmailStopwatch.stop();
+    debugPrint('⏱️ Gmail認証情報取得: ${gmailStopwatch.elapsedMilliseconds}ms');
 
     if (credentials == null) {
       debugPrint('❌ Gmail認証情報を取得できませんでした');
-      return 'Gmail送信権限がありません。設定画面から「Gmail権限を再取得」を試してください。';
+      return finishWithLog('Gmail送信権限がありません。設定画面から「Gmail権限を再取得」を試してください。');
     }
 
     // トークンの有効期限チェック（UTCで比較）
     if (credentials.accessToken.expiry.isBefore(DateTime.now().toUtc())) {
       debugPrint('❌ アクセストークンが期限切れです');
-      return 'アクセストークンの有効期限が切れています。設定画面から「Gmail権限を再取得」を試してください。';
+      return finishWithLog('アクセストークンの有効期限が切れています。設定画面から「Gmail権限を再取得」を試してください。');
     }
 
     // 3. 送信データの準備
@@ -90,34 +116,21 @@ Future<String> sendDailyEmail({
         : settings.recipientEmail;
 
     if (recipientEmail.isEmpty) {
-      return settings.isDebugMode
-          ? 'テスト送信先メールアドレスが設定されていません。'
-          : '送信先メールアドレスが設定されていません。';
+      return finishWithLog(
+        settings.isDebugMode
+            ? 'テスト送信先メールアドレスが設定されていません。'
+            : '送信先メールアドレスが設定されていません。',
+      );
     }
 
     // 4. Firebase Functions呼び出し（リトライロジック付き）
     const maxRetries = 3;
-    const timeout = Duration(seconds: 45);
+    const timeout = Duration(seconds: 90);
     Map<String, dynamic>? data;
 
     for (int attempt = 0; attempt < maxRetries; attempt++) {
       try {
         debugPrint('🔄 メール送信試行 ${attempt + 1}/$maxRetries');
-
-        // Firebase認証トークンを明示的にリフレッシュ
-        final firebaseToken = await AuthService.currentUser
-            ?.getIdToken(true) // true = force refresh
-            .timeout(
-              const Duration(seconds: 30),
-              onTimeout: () {
-                throw Exception('Firebase IDトークンの取得がタイムアウトしました');
-              },
-            );
-
-        if (firebaseToken == null) {
-          debugPrint('❌ Firebase IDトークンの取得に失敗しました');
-          return 'Firebase認証トークンの取得に失敗しました。再度サインインしてください。';
-        }
 
         // リージョンを明示的に指定（us-central1）
         final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
@@ -126,6 +139,7 @@ Future<String> sendDailyEmail({
           options: HttpsCallableOptions(timeout: timeout),
         );
 
+        final functionsStopwatch = Stopwatch()..start();
         final result = await callable.call({
           'monthDay': monthDay,
           'time': time,
@@ -136,6 +150,10 @@ Future<String> sendDailyEmail({
           'debugMode': settings.isDebugMode,
           'accessToken': credentials.accessToken.data,
         });
+        functionsStopwatch.stop();
+        debugPrint(
+          '⏱️ Functions呼び出し: ${functionsStopwatch.elapsedMilliseconds}ms',
+        );
 
         data = result.data as Map<String, dynamic>;
         debugPrint('✅ Firebase Functions呼び出し成功');
@@ -187,7 +205,7 @@ Future<String> sendDailyEmail({
           ? '（テストモード: ${currentSettings.testRecipientEmail}）'
           : '（通常モード: ${currentSettings.recipientEmail}）';
 
-      return 'メールが正常に送信されました。$modeMessage';
+      return finishWithLog('メールが正常に送信されました。$modeMessage');
     } else {
       // 送信失敗時も履歴に保存
       final errorMsg = '送信に失敗しました: ${data['message']}';
@@ -199,7 +217,7 @@ Future<String> sendDailyEmail({
         isDebugMode: settings.isDebugMode,
         errorMessage: errorMsg,
       );
-      return errorMsg;
+      return finishWithLog(errorMsg);
     }
   } catch (e) {
     debugPrint('❌ Firebase Functions エラー: $e');
@@ -249,6 +267,6 @@ Future<String> sendDailyEmail({
       errorMessage: fullErrorMessage,
     );
 
-    return fullErrorMessage;
+    return finishWithLog(fullErrorMessage);
   }
 }
