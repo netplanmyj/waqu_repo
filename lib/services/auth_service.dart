@@ -128,8 +128,10 @@ class AuthService {
       debugPrint(
         '   - authorizationCode: ${appleCredential.authorizationCode.isNotEmpty ? "存在" : "なし"}',
       );
-      debugPrint('   - email: ${appleCredential.email ?? "未提供"}');
-      debugPrint('   - userIdentifier: ${appleCredential.userIdentifier}');
+      debugPrint('   - email: ${appleCredential.email != null ? "存在" : "未提供"}');
+      if (kDebugMode) {
+        debugPrint('   - userIdentifier: ${appleCredential.userIdentifier}');
+      }
 
       // Firebase認証用のクレデンシャルを作成
       debugPrint('🔄 Firebase OAuthクレデンシャルを作成中...');
@@ -154,7 +156,10 @@ class AuthService {
         debugPrint('✅ 表示名を設定: $displayName');
       }
 
-      debugPrint('🎉 Apple Sign-In完了: ${userCredential.user?.email}');
+      debugPrint('🎉 Apple Sign-In完了');
+      if (kDebugMode) {
+        debugPrint('   - ユーザーEmail: ${userCredential.user?.email}');
+      }
       return userCredential;
     } on FirebaseAuthException catch (e) {
       // Firebase認証エラーの詳細ログ
