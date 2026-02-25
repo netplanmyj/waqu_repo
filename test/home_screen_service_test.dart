@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import '../lib/services/settings_service.dart';
 import '../lib/services/history_service.dart';
-import '../lib/services/home_screen_service.dart';
 
 void main() {
   group('HomeScreenService Tests', () {
@@ -118,18 +117,6 @@ void main() {
 
       expect(settings.recipientEmail, contains('@'));
       expect(settings.recipientEmail, contains('.'));
-    });
-
-    test('HomeScreenService デモモード時の送信シミュレーション', () async {
-      final result = await HomeScreenService.sendEmail(
-        time: '0950',
-        chlorine: 0.5,
-        isDemoMode: true,
-      );
-
-      expect(result, contains('デモモード'));
-      expect(result, contains('0950'));
-      expect(result, contains('0.5'));
     });
   });
 }

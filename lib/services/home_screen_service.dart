@@ -6,9 +6,7 @@ import 'history_service.dart';
 /// ホーム画面のビジネスロジックを管理するサービスクラス
 class HomeScreenService {
   /// 本日の送信状態を確認
-  static Future<Map<String, dynamic>> checkSentStatus({
-    required bool isDemoMode,
-  }) async {
+  static Future<Map<String, dynamic>> checkSentStatus() async {
     final settings = await SettingsService.getSettings();
     final locationNumber = settings.locationNumber;
     final isDebugMode = settings.isDebugMode;
@@ -56,14 +54,7 @@ class HomeScreenService {
   static Future<String> sendEmail({
     required String time,
     required double chlorine,
-    required bool isDemoMode,
   }) async {
-    if (isDemoMode) {
-      // デモモード: 送信をシミュレート
-      await Future.delayed(const Duration(seconds: 1));
-      return '【デモモード】送信をシミュレートしました\n時刻: $time\n残留塩素: $chlorine mg/L';
-    }
-
     // 通常モード: 実際に送信
     return await sendDailyEmail(time: time, chlorine: chlorine);
   }

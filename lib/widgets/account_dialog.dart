@@ -4,13 +4,8 @@ import 'auth_wrapper.dart';
 
 class AccountDialog extends StatelessWidget {
   final bool isDebugMode;
-  final bool isDemoMode;
 
-  const AccountDialog({
-    super.key,
-    required this.isDebugMode,
-    required this.isDemoMode,
-  });
+  const AccountDialog({super.key, required this.isDebugMode});
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +52,9 @@ class AccountDialog extends StatelessWidget {
                 ],
               ),
             ),
-          _buildInfoRow(
-            '名前',
-            isDemoMode ? 'Demo User' : (AuthService.userName ?? 'ユーザー'),
-          ),
+          _buildInfoRow('名前', AuthService.userName ?? 'ユーザー'),
           const SizedBox(height: 12),
-          _buildInfoRow(
-            'メールアドレス',
-            isDemoMode
-                ? 'demo@example.com'
-                : (AuthService.userEmail ?? 'メールアドレス不明'),
-          ),
+          _buildInfoRow('メールアドレス', AuthService.userEmail ?? 'メールアドレス不明'),
         ],
       ),
       actions: [
@@ -85,23 +72,15 @@ class AccountDialog extends StatelessWidget {
             try {
               await AuthService.signOut();
 
-              // Demoモードでは認証状態のストリームが変化しないため、明示的にサインイン画面へ戻す
-              if (isDemoMode) {
+              // 認証状態のストリームの更新を待つが、タイムアウトを設定して
+              // 万が一ストリームが更新されない場合に備える
+              await Future.delayed(const Duration(seconds: 2));
+              // ここで認証状態が更新されていない場合は、明示的にサインイン画面へ戻す
+              if (navigator.canPop()) {
                 navigator.pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const SignInScreen()),
                   (route) => false,
                 );
-              } else {
-                // 非Demoモードでは認証状態のストリームの更新を待つが、タイムアウトを設定して
-                // 万が一ストリームが更新されない場合に備える
-                await Future.delayed(const Duration(seconds: 2));
-                // ここで認証状態が更新されていない場合は、明示的にサインイン画面へ戻す
-                if (navigator.canPop()) {
-                  navigator.pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const SignInScreen()),
-                    (route) => false,
-                  );
-                }
               }
             } catch (e) {
               messenger.showSnackBar(

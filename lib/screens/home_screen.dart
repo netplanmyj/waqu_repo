@@ -12,9 +12,7 @@ import 'history_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final bool isDemoMode;
-
-  const HomeScreen({super.key, this.isDemoMode = false});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -54,12 +52,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeScreen() async {
-    if (!widget.isDemoMode) {
-      Future.microtask(() async {
-        await _checkSentStatus();
-        _lastCheckedDate = DateTime.now();
-      });
-    }
+    Future.microtask(() async {
+      await _checkSentStatus();
+      _lastCheckedDate = DateTime.now();
+    });
     await _initializeDateFormatting();
     await _loadLastHistory();
   }
@@ -76,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!widget.isDemoMode && _lastCheckedDate != null) {
+      if (_lastCheckedDate != null) {
         final now = DateTime.now();
         final lastChecked = _lastCheckedDate!;
         final dateChanged =
@@ -177,18 +173,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return;
       }
 
-      final String result;
-      if (widget.isDemoMode) {
-        await Future.delayed(const Duration(seconds: 1));
-        result = '【デモモード】送信をシミュレートしました\n時刻: $time\n残留塩素: $chlorine mg/L';
-      } else {
-        result = await sendDailyEmail(time: time, chlorine: chlorine);
-      }
+      final result = await sendDailyEmail(time: time, chlorine: chlorine);
 
       if (mounted) {
-        if (!widget.isDemoMode) {
-          _checkSentStatus();
-        }
+        _checkSentStatus();
 
         await _loadLastHistory();
 
@@ -214,10 +202,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         title: const Text('水質報告メール送信'),
         backgroundColor: Colors.blue[600],
         foregroundColor: Colors.white,
-        bottom: widget.isDemoMode ? _buildDemoModeBanner() : null,
         actions: [
-          if (widget.isDemoMode || AuthService.userEmail != null)
-            _buildUserInfoButton(),
+          if (AuthService.userEmail != null) _buildUserInfoButton(),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => Navigator.push(
@@ -286,39 +272,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  PreferredSize _buildDemoModeBanner() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(32),
-      child: Container(
-        color: Colors.orange[700],
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.preview, size: 16, color: Colors.white),
-            SizedBox(width: 8),
-            Text(
-              'Demo Mode (for App Review)',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildUserInfoButton() {
     return GestureDetector(
       onTap: () => showDialog(
         context: context,
-        builder: (context) => AccountDialog(
-          isDebugMode: _isDebugMode,
-          isDemoMode: widget.isDemoMode,
-        ),
+        builder: (context) => AccountDialog(isDebugMode: _isDebugMode),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -333,20 +291,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               CircleAvatar(
                 radius: 12,
-                backgroundImage:
-                    !widget.isDemoMode && AuthService.userPhotoUrl != null
+                backgroundImage: AuthService.userPhotoUrl != null
                     ? NetworkImage(AuthService.userPhotoUrl!)
                     : null,
                 backgroundColor: Colors.blue[300],
-                child: widget.isDemoMode || AuthService.userPhotoUrl == null
+                child: AuthService.userPhotoUrl == null
                     ? const Icon(Icons.person, size: 14, color: Colors.white)
                     : null,
               ),
               const SizedBox(width: 6),
               Text(
-                widget.isDemoMode
-                    ? 'demo@example.com'
-                    : _isDebugMode
+                _isDebugMode
                     ? 'demo-user'
                     : AuthService.userEmail!.split('@')[0],
                 style: const TextStyle(fontSize: 12),

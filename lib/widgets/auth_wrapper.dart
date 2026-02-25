@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../services/auth_service.dart';
-import '../screens/home_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   final Widget child;
@@ -190,15 +189,6 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  void _enterDemoMode() {
-    // デモモードでホーム画面に遷移（認証なし）
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(isDemoMode: true),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -315,19 +305,6 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            // デモモードボタン（App Review用）
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: _enterDemoMode,
-                icon: const Icon(Icons.preview, size: 16),
-                label: const Text(
-                  'Demo Mode (for App Review)',
-                  style: TextStyle(fontSize: 12),
-                ),
-                style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
-              ),
-            ),
           ],
         ),
       ),
