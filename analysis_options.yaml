@@ -9,6 +9,15 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  language:
+    strict-casts: true      # 暗黙的な型変換（ダウンキャスト）を禁止
+    strict-inference: true  # 型推論が曖昧な場合に警告
+    strict-raw-types: true  # List などのジェネリクスに型指定を強制
+
+  exclude:
+    - "build/**"
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
@@ -21,14 +30,25 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # 既存のルール
     avoid_relative_lib_imports: false  # Allow relative imports in test files
 
-# Directory-specific analyzer options
-analyzer:
-  exclude:
-    - "build/**"
+    # 1. 網羅性のチェック
+    exhaustive_cases: true  # switch文でenumの全ケースを網羅しているか
+
+    # 2. バグの種を摘み取るルール
+    unawaited_futures: true             # Future（非同期処理）の待ち忘れを指摘
+    control_flow_in_finally: true       # finallyブロック内での不適切な制御を防止
+    empty_statements: true              # 意味のないセミコロンなどを指摘
+
+    # 3. モダンなDartの書き方を強制（AIの古い書き方を修正）
+    prefer_const_constructors: true     # 可能な限り const を使わせる
+    prefer_final_fields: true           # 再代入しない変数を final にさせる
+    use_super_parameters: true          # Dart 3らしい簡潔なコンストラクタを強制
+
+    # 4. 可読性と保守性
+    camel_case_types: true              # クラス名はキャメルケース
+    always_declare_return_types: true   # 戻り値の型を省略させない
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
