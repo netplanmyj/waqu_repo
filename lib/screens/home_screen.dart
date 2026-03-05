@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'dart:async' show unawaited;
 import '../services/gmail_service.dart';
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
@@ -52,10 +53,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeScreen() async {
-    Future.microtask(() async {
-      await _checkSentStatus();
-      _lastCheckedDate = DateTime.now();
-    });
+    unawaited(
+      Future.microtask(() async {
+        await _checkSentStatus();
+        _lastCheckedDate = DateTime.now();
+      }),
+    );
     await _initializeDateFormatting();
     await _loadLastHistory();
   }
@@ -176,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final result = await sendDailyEmail(time: time, chlorine: chlorine);
 
       if (mounted) {
-        _checkSentStatus();
+        unawaited(_checkSentStatus());
 
         await _loadLastHistory();
 
@@ -208,7 +211,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             icon: const Icon(Icons.history),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const HistoryScreen()),
+              MaterialPageRoute<void>(
+                builder: (context) => const HistoryScreen(),
+              ),
             ),
             tooltip: '送信履歴',
           ),
@@ -274,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget _buildUserInfoButton() {
     return GestureDetector(
-      onTap: () => showDialog(
+      onTap: () => showDialog<void>(
         context: context,
         builder: (context) => AccountDialog(isDebugMode: _isDebugMode),
       ),
@@ -315,11 +320,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _navigateToSettings() async {
     final navigator = Navigator.of(context);
-    await navigator.push(
-      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    await navigator.push<void>(
+      MaterialPageRoute<void>(builder: (context) => const SettingsScreen()),
     );
     if (mounted) {
-      _checkSentStatus();
+      unawaited(_checkSentStatus());
     }
   }
 }

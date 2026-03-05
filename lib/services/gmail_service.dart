@@ -140,7 +140,7 @@ Future<String> sendDailyEmail({
         );
 
         final functionsStopwatch = Stopwatch()..start();
-        final result = await callable.call({
+        final result = await callable.call<Map<String, dynamic>>({
           'monthDay': monthDay,
           'time': time,
           'chlorine': chlorineFormatted,
@@ -155,7 +155,7 @@ Future<String> sendDailyEmail({
           '⏱️ Functions呼び出し: ${functionsStopwatch.elapsedMilliseconds}ms',
         );
 
-        data = result.data as Map<String, dynamic>;
+        data = result.data;
         debugPrint('✅ Firebase Functions呼び出し成功');
         break; // 成功したのでループを抜ける
       } catch (e) {
@@ -168,7 +168,7 @@ Future<String> sendDailyEmail({
           // 指数バックオフで待機（1秒, 2秒, 4秒, ...）
           final waitTime = Duration(seconds: 1 << attempt);
           debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
-          await Future.delayed(waitTime);
+          await Future<void>.delayed(waitTime);
           continue;
         }
 

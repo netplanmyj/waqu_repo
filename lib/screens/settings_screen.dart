@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async' show unawaited;
 import '../services/settings_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/settings_cards.dart';
@@ -188,7 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showDeleteAccountDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -231,12 +232,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _deleteAccount() async {
     try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const Center(child: CircularProgressIndicator());
-        },
+      unawaited(
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       );
 
       await AuthService.deleteAccount();

@@ -6,7 +6,7 @@ void main() {
   group('HomeScreenMessage Widget Tests', () {
     testWidgets('メッセージが正しく表示される', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: HomeScreenMessage(message: 'テストメッセージ', isSentToday: false),
           ),
@@ -18,7 +18,7 @@ void main() {
 
     testWidgets('未送信時のメッセージが表示される', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: HomeScreenMessage(message: 'まだ送信していません', isSentToday: false),
           ),
@@ -30,7 +30,7 @@ void main() {
 
     testWidgets('送信済み時のメッセージが表示される', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: HomeScreenMessage(message: '本日は送信済みです', isSentToday: true),
           ),

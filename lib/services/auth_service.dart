@@ -88,7 +88,7 @@ class AuthService {
           // 指数バックオフで待機（1秒, 2秒, 4秒, ...）
           final waitTime = Duration(seconds: 1 << attempt);
           debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
-          await Future.delayed(waitTime);
+          await Future<void>.delayed(waitTime);
           continue;
         }
 
@@ -278,7 +278,7 @@ class AuthService {
           if (attempt < maxRetries - 1) {
             final waitTime = Duration(milliseconds: 1000 * (attempt + 1));
             debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
-            await Future.delayed(waitTime);
+            await Future<void>.delayed(waitTime);
             continue;
           }
           return null;
@@ -308,7 +308,7 @@ class AuthService {
         if (attempt < maxRetries - 1 && _isRetriableError(e)) {
           final waitTime = Duration(milliseconds: 1000 * (attempt + 1));
           debugPrint('⏳ ${waitTime.inSeconds}秒後に再試行します...');
-          await Future.delayed(waitTime);
+          await Future<void>.delayed(waitTime);
           continue;
         }
 
@@ -386,7 +386,7 @@ class AuthService {
       await _auth.signOut();
 
       // 少し待機（トークンキャッシュのクリアを確実にする）
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
 
       // 再認証
       final result = await signInWithGoogle();

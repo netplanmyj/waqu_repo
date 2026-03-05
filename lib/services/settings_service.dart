@@ -61,12 +61,12 @@ class AppSettings {
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
-      locationNumber: json['locationNumber'] ?? '01',
-      recipientEmail: json['recipientEmail'] ?? '',
-      testRecipientEmail: json['testRecipientEmail'] ?? '',
-      isDebugMode: json['isDebugMode'] ?? false,
-      emailSubject: json['emailSubject'] ?? '毎日検査報告',
-      gasUrl: json['gasUrl'] ?? '', // 後方互換性
+      locationNumber: json['locationNumber'] as String? ?? '01',
+      recipientEmail: json['recipientEmail'] as String? ?? '',
+      testRecipientEmail: json['testRecipientEmail'] as String? ?? '',
+      isDebugMode: json['isDebugMode'] as bool? ?? false,
+      emailSubject: json['emailSubject'] as String? ?? '毎日検査報告',
+      gasUrl: json['gasUrl'] as String? ?? '', // 後方互換性
     );
   }
 }
@@ -84,7 +84,8 @@ class SettingsService {
     }
 
     try {
-      final Map<String, dynamic> json = jsonDecode(settingsJson);
+      final Map<String, dynamic> json =
+          jsonDecode(settingsJson) as Map<String, dynamic>;
       return AppSettings.fromJson(json);
     } catch (e) {
       return AppSettings.defaultSettings();

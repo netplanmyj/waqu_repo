@@ -77,7 +77,7 @@ void main() {
 
       // 1年前より新しいデータは保持される
       final recentHistory = EmailHistory(
-        date: now.subtract(Duration(days: 300)),
+        date: now.subtract(const Duration(days: 300)),
         time: '0950',
         chlorine: 0.45,
         success: true,
@@ -86,7 +86,7 @@ void main() {
 
       // 1年以上前のデータは削除対象
       final oldHistory = EmailHistory(
-        date: now.subtract(Duration(days: 400)),
+        date: now.subtract(const Duration(days: 400)),
         time: '0950',
         chlorine: 0.45,
         success: true,
@@ -124,32 +124,32 @@ void main() {
       final histories = [
         // 保持されるべきデータ（1年以内）
         EmailHistory(
-          date: now.subtract(Duration(days: 1)),
+          date: now.subtract(const Duration(days: 1)),
           time: '0950',
           chlorine: 0.45,
           success: true,
         ),
         EmailHistory(
-          date: now.subtract(Duration(days: 180)),
+          date: now.subtract(const Duration(days: 180)),
           time: '0950',
           chlorine: 0.45,
           success: true,
         ),
         EmailHistory(
-          date: now.subtract(Duration(days: 364)),
+          date: now.subtract(const Duration(days: 364)),
           time: '0950',
           chlorine: 0.45,
           success: true,
         ),
         // 削除されるべきデータ（1年以上前）
         EmailHistory(
-          date: now.subtract(Duration(days: 366)),
+          date: now.subtract(const Duration(days: 366)),
           time: '0950',
           chlorine: 0.45,
           success: true,
         ),
         EmailHistory(
-          date: now.subtract(Duration(days: 500)),
+          date: now.subtract(const Duration(days: 500)),
           time: '0950',
           chlorine: 0.45,
           success: true,
@@ -171,7 +171,7 @@ void main() {
       final oneYearAgo = DateTime(now.year - 1, now.month, now.day);
 
       final debugHistory = EmailHistory(
-        date: now.subtract(Duration(days: 100)),
+        date: now.subtract(const Duration(days: 100)),
         time: '0950',
         chlorine: 0.45,
         success: true,
@@ -179,7 +179,7 @@ void main() {
       );
 
       final productionHistory = EmailHistory(
-        date: now.subtract(Duration(days: 100)),
+        date: now.subtract(const Duration(days: 100)),
         time: '0950',
         chlorine: 0.45,
         success: true,

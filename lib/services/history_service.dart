@@ -31,12 +31,12 @@ class EmailHistory {
 
   factory EmailHistory.fromJson(Map<String, dynamic> json) {
     return EmailHistory(
-      date: DateTime.parse(json['date']),
-      time: json['time'],
-      chlorine: json['chlorine'],
-      success: json['success'],
-      isDebugMode: json['isDebugMode'] ?? false, // 既存データとの互換性のため
-      errorMessage: json['errorMessage'],
+      date: DateTime.parse(json['date'] as String),
+      time: json['time'] as String,
+      chlorine: json['chlorine'] as double,
+      success: json['success'] as bool,
+      isDebugMode: (json['isDebugMode'] as bool?) ?? false, // 既存データとの互換性のため
+      errorMessage: json['errorMessage'] as String?,
     );
   }
 }
@@ -90,9 +90,10 @@ class HistoryService {
     if (historyJson == null) return [];
 
     try {
-      final List<dynamic> historyList = json.decode(historyJson);
+      final List<dynamic> historyList =
+          json.decode(historyJson) as List<dynamic>;
       var histories = historyList
-          .map((json) => EmailHistory.fromJson(json))
+          .map((json) => EmailHistory.fromJson(json as Map<String, dynamic>))
           .toList();
 
       // 1年以上前のデータを自動削除（閏年を考慮）

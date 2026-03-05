@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'dart:async' show unawaited;
 import '../services/history_service.dart';
 import '../services/settings_service.dart';
 import '../widgets/history_card.dart';
@@ -26,7 +27,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _initializeDateFormatting() async {
     await initializeDateFormatting('ja_JP', null);
-    _loadHistories();
+    unawaited(_loadHistories());
   }
 
   Future<void> _loadHistories() async {
@@ -129,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _showErrorDialog(EmailHistory history) {
     final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -211,7 +212,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _showDeleteConfirmDialog(EmailHistory history) {
     final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
