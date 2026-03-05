@@ -189,44 +189,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showDeleteAccountDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.warning, color: Colors.red),
-              SizedBox(width: 8),
-              Text('アカウント削除の確認'),
-            ],
-          ),
-          content: const Text(
-            'アカウントを削除してもよろしいですか？\n\n'
-            'この操作により、以下が完全に削除されます:\n'
-            '• 認証情報\n'
-            '• アプリ内の設定\n'
-            '• 送信履歴\n\n'
-            'この操作は取り消せません。',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('キャンセル'),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.warning, color: Colors.red),
+                SizedBox(width: 8),
+                Text('アカウント削除の確認'),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteAccount();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red[600],
-                foregroundColor: Colors.white,
+            content: const Text(
+              'アカウントを削除してもよろしいですか？\n\n'
+              'この操作により、以下が完全に削除されます:\n'
+              '• 認証情報\n'
+              '• アプリ内の設定\n'
+              '• 送信履歴\n\n'
+              'この操作は取り消せません。',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('キャンセル'),
               ),
-              child: const Text('削除する'),
-            ),
-          ],
-        );
-      },
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  unawaited(_deleteAccount());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[600],
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('削除する'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 

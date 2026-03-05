@@ -77,7 +77,7 @@ class AccountDialog extends StatelessWidget {
               // 万が一ストリームが更新されない場合に備える
               await Future<void>.delayed(const Duration(seconds: 2));
               // ここで認証状況が更新されていない場合は、明示的にサインイン画面へ戻す
-              if (navigator.canPop()) {
+              if (context.mounted) {
                 unawaited(
                   navigator.pushAndRemoveUntil(
                     MaterialPageRoute<void>(

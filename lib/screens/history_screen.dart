@@ -21,8 +21,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeDateFormatting();
-    _loadSettings();
+    unawaited(_initializeDateFormatting());
+    unawaited(_loadSettings());
   }
 
   Future<void> _initializeDateFormatting() async {
@@ -130,57 +130,59 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _showErrorDialog(EmailHistory history) {
     final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.error_outline, color: Colors.red[700]),
-            const SizedBox(width: 8),
-            const Text('送信エラー詳細'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
             children: [
-              Text(
-                dateFormat.format(history.date),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow('測定時刻', history.time),
-              const SizedBox(height: 8),
-              _buildInfoRow(
-                '残留塩素',
-                '${history.chlorine.toStringAsFixed(2)} mg/L',
-              ),
-              const Divider(height: 24),
-              Text(
-                'エラー内容',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red[700],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                history.errorMessage ?? '不明なエラー',
-                style: TextStyle(color: Colors.grey[800]),
-              ),
+              Icon(Icons.error_outline, color: Colors.red[700]),
+              const SizedBox(width: 8),
+              const Text('送信エラー詳細'),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('閉じる'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  dateFormat.format(history.date),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildInfoRow('測定時刻', history.time),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  '残留塩素',
+                  '${history.chlorine.toStringAsFixed(2)} mg/L',
+                ),
+                const Divider(height: 24),
+                Text(
+                  'エラー内容',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red[700],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  history.errorMessage ?? '不明なエラー',
+                  style: TextStyle(color: Colors.grey[800]),
+                ),
+              ],
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('閉じる'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -212,57 +214,59 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _showDeleteConfirmDialog(EmailHistory history) {
     final dateFormat = DateFormat('M月d日 (E) HH:mm', 'ja_JP');
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.delete_outline, color: Colors.orange[700]),
-            const SizedBox(width: 8),
-            const Text('送信履歴の削除'),
-          ],
-        ),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('この送信履歴を削除しますか？'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.delete_outline, color: Colors.orange[700]),
+              const SizedBox(width: 8),
+              const Text('送信履歴の削除'),
+            ],
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('この送信履歴を削除しますか？'),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dateFormat.format(history.date),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('測定時刻: ${history.time}'),
+                    Text('残留塩素: ${history.chlorine.toStringAsFixed(2)} mg/L'),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    dateFormat.format(history.date),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text('測定時刻: ${history.time}'),
-                  Text('残留塩素: ${history.chlorine.toStringAsFixed(2)} mg/L'),
-                ],
-              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteHistory(history);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red[700]),
+              child: const Text('削除'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _deleteHistory(history);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red[700]),
-            child: const Text('削除'),
-          ),
-        ],
       ),
     );
   }

@@ -84,10 +84,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             lastChecked.day != now.day;
 
         if (dateChanged) {
-          Future.microtask(() async {
-            await _checkSentStatus();
-            _lastCheckedDate = now;
-          });
+          unawaited(
+            Future.microtask(() async {
+              await _checkSentStatus();
+              _lastCheckedDate = now;
+            }),
+          );
         }
       }
     }
@@ -209,10 +211,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           if (AuthService.userEmail != null) _buildUserInfoButton(),
           IconButton(
             icon: const Icon(Icons.history),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const HistoryScreen(),
+            onPressed: () => unawaited(
+              Navigator.push<void>(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const HistoryScreen(),
+                ),
               ),
             ),
             tooltip: '送信履歴',
@@ -279,9 +283,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget _buildUserInfoButton() {
     return GestureDetector(
-      onTap: () => showDialog<void>(
-        context: context,
-        builder: (context) => AccountDialog(isDebugMode: _isDebugMode),
+      onTap: () => unawaited(
+        showDialog<void>(
+          context: context,
+          builder: (context) => AccountDialog(isDebugMode: _isDebugMode),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
