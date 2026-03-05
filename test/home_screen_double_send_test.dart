@@ -72,7 +72,7 @@ void main() {
                                     isSending = true;
                                   });
                                   // 送信処理をシミュレート（500ms）
-                                  await Future.delayed(
+                                  await Future<void>.delayed(
                                     const Duration(milliseconds: 500),
                                   );
                                   if (context.mounted) {
@@ -143,7 +143,7 @@ void main() {
 
                                   try {
                                     // エラーをシミュレート
-                                    await Future.delayed(
+                                    await Future<void>.delayed(
                                       const Duration(milliseconds: 100),
                                     );
                                     throw Exception('送信エラー');
@@ -241,9 +241,9 @@ void main() {
 
       // 送信中
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
-            body: ElevatedButton(onPressed: null, child: const Text('送信中...')),
+            body: ElevatedButton(onPressed: null, child: Text('送信中...')),
           ),
         ),
       );

@@ -6,7 +6,7 @@ void main() {
   group('Settings Cards Widget Tests', () {
     testWidgets('SettingsCard が正しく表示される', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: SettingsCard(title: 'テストカード', child: Text('テスト内容')),
           ),
@@ -186,7 +186,7 @@ void main() {
 
     testWidgets('SettingsCard はアイコンを表示できる', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: SettingsCard(
               title: 'テストカード',

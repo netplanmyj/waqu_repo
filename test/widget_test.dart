@@ -11,8 +11,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            appBar: AppBar(title: Text('テスト')),
-            body: Text('テストが動作しています'),
+            appBar: AppBar(title: const Text('テスト')),
+            body: const Text('テストが動作しています'),
           ),
         ),
       );

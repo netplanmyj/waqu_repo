@@ -120,9 +120,9 @@ class EmailAddressField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         hintText: '例: report@example.com',
-        border: const OutlineInputBorder(),
+        border: OutlineInputBorder(),
         helperText: 'メールアドレスを入力してください',
       ),
       keyboardType: TextInputType.emailAddress,
