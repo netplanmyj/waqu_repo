@@ -7,6 +7,13 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 
+/// getGmailCredentials のリトライ対象となるアクセストークン未取得エラー
+class _NullTokenException implements Exception {
+  const _NullTokenException();
+  @override
+  String toString() => 'アクセストークンが取得できませんでした';
+}
+
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -34,8 +41,8 @@ class AuthService {
         () => _performGoogleSignIn(timeout),
         maxRetries: maxRetries,
       );
-    } catch (e) {
-      throw Exception('Google認証に失敗しました: $e');
+    } catch (e, st) {
+      Error.throwWithStackTrace(Exception('Google認証に失敗しました: $e'), st);
     }
   }
 
@@ -219,12 +226,16 @@ class AuthService {
   /// 再試行付きで操作を実行するヘルパー。
   /// [operation] が例外をスローし、それが再試行可能な場合は指数バックオフで再試行する。
   /// すべての試行が失敗した場合は最後の例外をそのままスローする。
+  /// [maxRetries] は 1 以上である必要がある。
   static Future<T> _withRetry<T>(
     String operationName,
     Future<T> Function() operation, {
     int maxRetries = 3,
     bool Function(dynamic)? isRetriable,
   }) async {
+    if (maxRetries < 1) {
+      throw ArgumentError.value(maxRetries, 'maxRetries', '1以上である必要があります');
+    }
     final retriable = isRetriable ?? _isRetriableError;
     for (int attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -254,9 +265,7 @@ class AuthService {
         'Gmail認証情報取得',
         () => _performGetGmailCredentials(timeout),
         maxRetries: maxRetries,
-        isRetriable: (e) =>
-            _isRetriableError(e) ||
-            e.toString().contains('アクセストークンが取得できませんでした'),
+        isRetriable: (e) => _isRetriableError(e) || e is _NullTokenException,
       );
     } catch (e) {
       debugPrint('❌ Gmail認証情報取得失敗: $e');
@@ -286,7 +295,7 @@ class AuthService {
 
     if (googleAuth.accessToken == null) {
       debugPrint('❌ アクセストークンが取得できませんでした');
-      throw Exception('アクセストークンが取得できませんでした');
+      throw const _NullTokenException();
     }
 
     debugPrint('✅ Gmail認証情報取得成功');
