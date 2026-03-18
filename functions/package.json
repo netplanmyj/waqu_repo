@@ -31,8 +31,8 @@
   },
   "private": true,
   "overrides": {
-    "fast-xml-parser": ">=5.5.6",
-    "@tootallnate/once": ">=3.0.1",
-    "flatted": ">=3.4.0"
+    "fast-xml-parser": "^5.5.6",
+    "@tootallnate/once": "^3.0.1",
+    "flatted": "^3.4.2"
   }
 }
