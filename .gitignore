@@ -73,3 +73,6 @@ app.*.map.json
 
 # Python関連
 venv/
+
+# Claude Code
+.claude/settings.local.json
